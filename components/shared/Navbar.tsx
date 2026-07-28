@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LogOut, Settings, User } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { logout } from "@/service/utils/logout"
 
 // Organized navigation items
 const NAV_ITEMS = [
@@ -22,12 +24,24 @@ const NAV_ITEMS = [
 
 // User dropdown menu items
 const USER_MENU_ITEMS = [
-  { label: "Profile", icon: User },
-  { label: "Settings", icon: Settings },
-  { label: "Logout", icon: LogOut },
+  { label: "Profile", icon: User, action: "profile" },
+  { label: "Settings", icon: Settings, action: "settings" },
+  { label: "Logout", icon: LogOut, action: "logout" },
 ]
 
 export function Navbar() {
+  const router = useRouter()
+
+  const handleUserMenuAction = async (action: string) => {
+    if (action === "profile") {
+      router.push("/profile")
+    } else if (action === "settings") {
+      router.push("/settings")
+    } else if (action === "logout") {
+      await logout()
+    }
+  }
+
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
@@ -74,7 +88,11 @@ export function Navbar() {
             {USER_MENU_ITEMS.map((item) => {
               const Icon = item.icon
               return (
-                <DropdownMenuItem key={item.label} className="cursor-pointer">
+                <DropdownMenuItem
+                  key={item.label}
+                  className="cursor-pointer"
+                  onClick={() => handleUserMenuAction(item.action)}
+                >
                   <Icon className="mr-2 size-4" />
                   <span>{item.label}</span>
                 </DropdownMenuItem>
