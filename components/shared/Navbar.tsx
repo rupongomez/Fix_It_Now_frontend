@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ChevronDown, LogOut, Settings, User } from "lucide-react"
+import { LogOut, Settings, User } from "lucide-react"
 
 // Organized navigation items
 const NAV_ITEMS = [
@@ -54,17 +54,14 @@ export function Navbar() {
 
         {/* Right side: User Dropdown */}
         <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button variant="ghost" className="gap-2 pr-3 pl-2">
-              <Avatar className="size-8">
-                <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-                <AvatarFallback>JD</AvatarFallback>
-              </Avatar>
-              <span className="hidden text-sm font-medium sm:inline">
-                John Doe
-              </span>
-              <ChevronDown className="size-4" />
-            </Button>
+          <DropdownMenuTrigger className="flex cursor-pointer items-center gap-2 rounded-lg pr-3 pl-2 transition-colors outline-none hover:bg-accent">
+            <Avatar className="size-8">
+              <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+              <AvatarFallback>JD</AvatarFallback>
+            </Avatar>
+            <span className="hidden text-sm font-medium sm:inline">
+              John Doe
+            </span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <div className="flex flex-col gap-2 p-2">
