@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { LoginAction } from "../_auth/authActions"
 import { toast } from "sonner"
+import { useSearchParams } from "next/navigation"
 
 // Define the login form schema
 const loginSchema = z.object({
@@ -26,8 +27,13 @@ const LoginForm = () => {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   })
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get("redirectTo") ?? ""
 
-  const [state, action, pending] = useActionState(LoginAction, false)
+  const [state, action, pending] = useActionState(
+    LoginAction.bind(null, redirectTo),
+    false
+  )
 
   useEffect(() => {
     if (!state) return

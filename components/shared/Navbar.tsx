@@ -95,15 +95,17 @@ export function Navbar({ user }: { user?: IUser }) {
                 <AvatarFallback>JD</AvatarFallback>
               </Avatar>
               <span className="hidden text-sm font-medium sm:inline">
-                John Doe
+                {user.data.name}
               </span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <div className="flex flex-col gap-2 p-2">
                 <p className="text-sm font-semibold text-foreground">
-                  john@example.com
+                  {user.data.email}
                 </p>
-                <p className="text-xs text-muted-foreground">Pro Member</p>
+                <p className="text-xs text-muted-foreground">
+                  {user.data.role}
+                </p>
               </div>
               <DropdownMenuSeparator />
               {USER_MENU_ITEMS.map((item) => {

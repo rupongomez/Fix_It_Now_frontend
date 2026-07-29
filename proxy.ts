@@ -8,6 +8,7 @@ import { getNewAccessToken } from "./service/getNewAccessToken"
 const AUTH_ROUTES = ["/login", "/register"]
 
 const PUBLIC_ROUTES = ["/", "/services"]
+const PROTECTED_ROUTES = ["/profile", "/dashboard", "/bookings", "/payments"]
 
 export async function proxy(request: NextRequest) {
   const pathName = request.nextUrl.pathname
@@ -65,7 +66,6 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  console.log("testing", userRole)
   const isPublicRoute = PUBLIC_ROUTES.some(
     (route) => pathName === route || pathName.startsWith(route + "/")
   )
@@ -74,11 +74,19 @@ export async function proxy(request: NextRequest) {
     (route) => pathName === route || pathName.startsWith(route + "/")
   )
 
+  const isProtectedRoute = PROTECTED_ROUTES.some(
+    (route) => pathName === route || pathName.startsWith(route + "/")
+  )
+
   if (!accessToken && !isPublicRoute && !isAuthRoute) {
     const loginUrl = new URL("/login", request.url)
     loginUrl.searchParams.set("redirectTo", pathName)
 
     return NextResponse.redirect(loginUrl)
+  }
+
+  if (!accessToken && isProtectedRoute) {
+    return NextResponse.redirect(new URL("/login", request.url))
   }
 
   // Authorization : Role based access control

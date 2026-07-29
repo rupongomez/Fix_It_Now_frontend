@@ -4,6 +4,8 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 import { Toaster } from "sonner"
+import { Navbar } from "@/components/shared/Navbar"
+import { getMe } from "@/service/getMe"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -12,11 +14,13 @@ const fontMono = Geist_Mono({
   variable: "--font-mono",
 })
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const user = await getMe()
+
   return (
     <html
       lang="en"
@@ -30,6 +34,8 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
+          <Navbar user={user} />
+
           <Toaster position="top-right" richColors />
           {children}
         </ThemeProvider>

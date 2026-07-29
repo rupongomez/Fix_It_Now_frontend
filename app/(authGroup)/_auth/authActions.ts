@@ -5,6 +5,7 @@ import { redirect } from "next/navigation"
 import { LoginState, RegisterActionResult } from "./types"
 
 export const LoginAction = async (
+  redirectTo: string,
   prevState: LoginState,
   formData: FormData
 ) => {
@@ -40,9 +41,16 @@ export const LoginAction = async (
     })
 
     const decodedToken = jwt.decode(result.data.accessToken) as JwtPayload
-
+    if (
+      redirectTo &&
+      typeof redirectTo === "string" &&
+      redirectTo.startsWith("/") &&
+      !redirectTo.startsWith("//")
+    ) {
+      redirect(redirectTo)
+    }
     if (decodedToken.role === "CUSTOMER") {
-      redirect("/dashboard")
+      redirect("/dashboard/customer")
     } else if (decodedToken.role === "TECHNICIAN") {
       redirect("/dashboard/technician")
     } else if (decodedToken.role === "ADMIN") {

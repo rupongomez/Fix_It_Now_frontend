@@ -3,7 +3,7 @@ import RegisterForm from "../_components/RegisterForm"
 
 export default function RegisterPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-muted/20 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-b from-background to-muted/20 px-4 py-12">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="mb-8 text-center">

@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState, useEffect, useState } from "react"
+import { useActionState, useEffect, useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -29,6 +29,7 @@ type RegisterFormData = z.infer<typeof registerSchema>
 const RegisterForm = () => {
   const [successMessage, setSuccessMessage] = useState("")
   const [errorMessage, setErrorMessage] = useState("")
+  const [isPending, startTransition] = useTransition()
   const [role, setRole] = useState<string>("CUSTOMER")
   const router = useRouter()
 
@@ -61,6 +62,18 @@ const RegisterForm = () => {
     }
   }, [state, router])
 
+  const onSubmit = async (data: RegisterFormData) => {
+    // Convert data to FormData for the server action
+    const formData = new FormData()
+    Object.entries(data).forEach(([key, value]) => {
+      formData.append(key, value as string)
+    })
+
+    startTransition(() => {
+      action(formData)
+    })
+  }
+
   return (
     <div>
       {/* Success Message */}
@@ -83,7 +96,7 @@ const RegisterForm = () => {
         </Alert>
       )}
 
-      <form action={action} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Name Field */}
         <div>
           <label className="mb-2 block text-sm font-medium text-foreground">
