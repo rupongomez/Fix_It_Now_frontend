@@ -51,14 +51,52 @@ export async function proxy(request: NextRequest) {
   if (decodedAccessToken?.success && decodedAccessToken.data) {
     userRole = (decodedAccessToken.data as JwtPayload).role
   }
+  console.log(userRole)
 
   if (accessToken && AUTH_ROUTES.includes(pathName)) {
     if (userRole === "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard/admin", request.url))
+    } else if (userRole === "CUSTOMER") {
+      return NextResponse.redirect(new URL("/dashboard/customer", request.url))
+    } else if (userRole === "TECHNICIAN") {
+      return NextResponse.redirect(
+        new URL("/dashboard/technician", request.url)
+      )
     }
-
-    return NextResponse.next()
   }
+
+  console.log("testing", userRole)
+  const isPublicRoute = PUBLIC_ROUTES.some(
+    (route) => pathName === route || pathName.startsWith(route + "/")
+  )
+
+  const isAuthRoute = AUTH_ROUTES.some(
+    (route) => pathName === route || pathName.startsWith(route + "/")
+  )
+
+  if (!accessToken && !isPublicRoute && !isAuthRoute) {
+    const loginUrl = new URL("/login", request.url)
+    loginUrl.searchParams.set("redirectTo", pathName)
+
+    return NextResponse.redirect(loginUrl)
+  }
+
+  // Authorization : Role based access control
+  if (pathName.startsWith("/dashboard/admin") && userRole !== "ADMIN") {
+    return NextResponse.redirect(new URL("/not-found", request.url))
+  } else if (
+    pathName.startsWith("/dashboard/technician") &&
+    userRole !== "TECHNICIAN"
+  ) {
+    return NextResponse.redirect(new URL("/not-found", request.url))
+  } else if (
+    pathName.startsWith("/dashboard/customer") &&
+    userRole !== "CUSTOMER"
+  ) {
+    return NextResponse.redirect(new URL("/not-found", request.url))
+  }
+
+  return NextResponse.next()
 }
 
 export const config = {
