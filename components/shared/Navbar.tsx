@@ -12,7 +12,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LogOut, Settings, User } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { logout } from "@/service/utils/logout"
+import { logout } from "@/service/logout"
 
 // Organized navigation items
 const NAV_ITEMS = [
@@ -29,7 +29,27 @@ const USER_MENU_ITEMS = [
   { label: "Logout", icon: LogOut, action: "logout" },
 ]
 
-export function Navbar() {
+type IUser = {
+  success: boolean
+  statusCode: number
+  message: string
+  data: {
+    id: string
+    name: string
+    email: string
+    phone: string
+    location: string
+    role: string
+    status: string
+    profileImage?: string
+    stripeCustomerId?: string | null
+    createdAt: string
+    updatedAt: string
+  }
+}
+
+export function Navbar({ user }: { user?: IUser }) {
+  console.log(user)
   const router = useRouter()
 
   const handleUserMenuAction = async (action: string) => {
@@ -67,39 +87,45 @@ export function Navbar() {
         </div>
 
         {/* Right side: User Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex cursor-pointer items-center gap-2 rounded-lg pr-3 pl-2 transition-colors outline-none hover:bg-accent">
-            <Avatar className="size-8">
-              <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-              <AvatarFallback>JD</AvatarFallback>
-            </Avatar>
-            <span className="hidden text-sm font-medium sm:inline">
-              John Doe
-            </span>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <div className="flex flex-col gap-2 p-2">
-              <p className="text-sm font-semibold text-foreground">
-                john@example.com
-              </p>
-              <p className="text-xs text-muted-foreground">Pro Member</p>
-            </div>
-            <DropdownMenuSeparator />
-            {USER_MENU_ITEMS.map((item) => {
-              const Icon = item.icon
-              return (
-                <DropdownMenuItem
-                  key={item.label}
-                  className="cursor-pointer"
-                  onClick={() => handleUserMenuAction(item.action)}
-                >
-                  <Icon className="mr-2 size-4" />
-                  <span>{item.label}</span>
-                </DropdownMenuItem>
-              )
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {user?.success ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex cursor-pointer items-center gap-2 rounded-lg pr-3 pl-2 transition-colors outline-none hover:bg-accent">
+              <Avatar className="size-8">
+                <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+                <AvatarFallback>JD</AvatarFallback>
+              </Avatar>
+              <span className="hidden text-sm font-medium sm:inline">
+                John Doe
+              </span>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <div className="flex flex-col gap-2 p-2">
+                <p className="text-sm font-semibold text-foreground">
+                  john@example.com
+                </p>
+                <p className="text-xs text-muted-foreground">Pro Member</p>
+              </div>
+              <DropdownMenuSeparator />
+              {USER_MENU_ITEMS.map((item) => {
+                const Icon = item.icon
+                return (
+                  <DropdownMenuItem
+                    key={item.label}
+                    className="cursor-pointer"
+                    onClick={() => handleUserMenuAction(item.action)}
+                  >
+                    <Icon className="mr-2 size-4" />
+                    <span>{item.label}</span>
+                  </DropdownMenuItem>
+                )
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button>
+            <Link href={"/login"}>Login</Link>
+          </Button>
+        )}
       </div>
     </nav>
   )

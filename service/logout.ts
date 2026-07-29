@@ -9,4 +9,5 @@ export const logout = async () => {
   cookieStore.delete("accessToken")
   cookieStore.delete("refreshToken")
   revalidateTag("my-profile", { expire: 0 })
+  return
 }
