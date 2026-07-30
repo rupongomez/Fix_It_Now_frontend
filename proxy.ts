@@ -7,7 +7,7 @@ import { JwtPayload } from "jsonwebtoken"
 import { getNewAccessToken } from "./service/getNewAccessToken"
 const AUTH_ROUTES = ["/login", "/register"]
 
-const PUBLIC_ROUTES = ["/", "/services"]
+const PUBLIC_ROUTES = ["/", "/services", "/technicians"]
 const PROTECTED_ROUTES = ["/profile", "/dashboard", "/bookings", "/payments"]
 
 export async function proxy(request: NextRequest) {

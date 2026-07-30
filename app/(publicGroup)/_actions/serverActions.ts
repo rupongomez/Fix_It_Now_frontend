@@ -32,3 +32,48 @@ export const getServices = async (filters: IFilter) => {
 
   return res.json()
 }
+interface ITechnicianFilters {
+  hourlyRate: string
+  location: string
+  minAverageRating: string
+  isAvailable: string
+  minCompletedJobs: string
+  sortBy: "hourlyRate" | "averageRating" | "completedJobs"
+  sortOrder: "asc" | "desc"
+  page?: number
+  limit?: number
+}
+
+export const getTechnicians = async (filter: ITechnicianFilters) => {
+  const params = new URLSearchParams()
+  params.set("sortBy", filter.sortBy)
+  params.set("sortOrder", filter.sortOrder)
+
+  if (filter.hourlyRate !== null) {
+    params.set("hourlyRate", filter.hourlyRate)
+  }
+  if (filter.location !== "All") {
+    params.set("location", filter.location)
+  }
+  if (filter.minAverageRating !== null) {
+    params.set("minAverageRating", filter.minAverageRating)
+  }
+  if (filter.isAvailable !== null) {
+    params.set("isAvailable", filter.isAvailable)
+  }
+  if (filter.minCompletedJobs !== null) {
+    params.set("minCompletedJobs", filter.minCompletedJobs)
+  }
+  if (filter.sortBy !== null) {
+    params.set("sortBy", filter.sortBy)
+  }
+  if (filter.sortOrder !== null) {
+    params.set("sortOrder", filter.sortOrder)
+  }
+
+  const res = await fetch(
+    `${process.env.BACKEND_API_URL}/api/technician?${params.toString()}`
+  )
+
+  return res.json()
+}

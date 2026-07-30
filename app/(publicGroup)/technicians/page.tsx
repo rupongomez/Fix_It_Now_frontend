@@ -12,30 +12,44 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { MapPin, Clock, DollarSign, Star, X } from "lucide-react"
-import { getServices } from "../_actions/serverActions"
+import { MapPin, Clock, DollarSign, Star, X, Briefcase } from "lucide-react"
+import { getTechnicians } from "../_actions/serverActions"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 
-interface Service {
+interface Technician {
   id: string
-  title: string
-  description: string
-  price: string
-  duration: number
+  name: string
+  email: string
+  phone: string
   location: string
-  type: string
+  hourlyRate: number
+  averageRating: number
+  isAvailable: boolean
+  completedJobs: number
+  profileImage?: string
+  skills: string[]
   createdAt: string
-  technicianProfileId: string
-  categoryId: string
   updatedAt: string
 }
 
 interface Filters {
   location: string
-  minPrice: number | null
-  maxPrice: number | null
-  type: string
-  sortBy: "createdAt" | "price"
+  hourlyRate: string
+  minAverageRating: string
+  isAvailable: string
+  minCompletedJobs: string
+  sortBy: "hourlyRate" | "averageRating" | "completedJobs"
   sortOrder: "asc" | "desc"
+  page?: number
+  limit?: number
 }
 
 const LOCATION_OPTIONS = [
@@ -49,49 +63,61 @@ const LOCATION_OPTIONS = [
   "Khulna",
   "Rangpur",
 ]
-const SERVICE_TYPES = ["All", "AC Repair", "PC Repair", "TV Repair"]
 
-export default function ServicesPage() {
-  const [services, setServices] = useState<Service[]>([])
+const ITEMS_PER_PAGE = 5
+
+export default function TechniciansPage() {
+  const [technicians, setTechnicians] = useState<Technician[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
   const [filters, setFilters] = useState<Filters>({
     location: "All",
-    minPrice: null,
-    maxPrice: null,
-    type: "All",
-    sortBy: "createdAt",
+    hourlyRate: "",
+    minAverageRating: "0",
+    isAvailable: "true",
+    minCompletedJobs: "",
+    sortBy: "averageRating",
     sortOrder: "desc",
+    page: currentPage,
+    limit: ITEMS_PER_PAGE,
   })
   console.log(filters)
 
   useEffect(() => {
-    const fetchServices = async () => {
+    const fetchTechnicians = async () => {
       try {
-        const loadServices = await getServices(filters)
-        console.log(loadServices)
-        setServices(loadServices.data)
+        const loadTechnicians = await getTechnicians({
+          ...filters,
+          page: currentPage,
+          limit: ITEMS_PER_PAGE,
+        })
+        console.log(loadTechnicians)
+        setTechnicians(loadTechnicians.data)
       } catch (err) {
         console.error(err)
       }
     }
 
-    fetchServices()
-  }, [filters, setServices])
+    fetchTechnicians()
+  }, [filters, setTechnicians, currentPage])
 
   const clearFilters = () => {
     setFilters({
       location: "All",
-      type: "All",
-      minPrice: null,
-      maxPrice: null,
-      sortBy: "createdAt",
+      hourlyRate: "",
+      minAverageRating: "0",
+      isAvailable: "true",
+      minCompletedJobs: "",
+      sortBy: "averageRating",
       sortOrder: "desc",
     })
   }
+
   const hasActiveFilters =
     filters.location !== "All" ||
-    filters.type !== "All" ||
-    filters.minPrice !== null ||
-    filters.maxPrice !== null
+    filters.hourlyRate !== "" ||
+    filters.minAverageRating !== "0" ||
+    filters.isAvailable !== "true" ||
+    filters.minCompletedJobs !== ""
 
   return (
     <div className="min-h-screen bg-linear-to-b from-background to-muted/20">
@@ -99,10 +125,10 @@ export default function ServicesPage() {
       <div className="container mx-auto px-4 py-12">
         <div className="mb-8">
           <h1 className="mb-2 text-4xl font-bold text-foreground">
-            Our Services
+            Our Technicians
           </h1>
           <p className="text-lg text-muted-foreground">
-            Browse our comprehensive range of professional services
+            Browse our team of skilled and trusted technicians
           </p>
         </div>
 
@@ -135,64 +161,60 @@ export default function ServicesPage() {
                 </div>
               </div>
 
-              {/* Service Type Filter */}
+              {/* Hourly Rate Filter */}
               <div>
                 <label className="mb-2 block text-xs font-medium text-muted-foreground">
-                  Service Type
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {SERVICE_TYPES.map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => setFilters({ ...filters, type })}
-                      className={`rounded px-3 py-1.5 text-sm font-medium transition-colors ${
-                        filters.type === type
-                          ? "bg-primary text-primary-foreground"
-                          : "border border-border bg-background hover:bg-muted"
-                      }`}
-                    >
-                      {type}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Min Price Filter */}
-              <div>
-                <label className="mb-2 block text-xs font-medium text-muted-foreground">
-                  Min Price (৳)
+                  Max Hourly Rate (৳)
                 </label>
                 <Input
                   type="number"
-                  placeholder="0"
-                  value={filters.minPrice ?? ""}
+                  placeholder="e.g., 1000"
+                  value={filters.hourlyRate}
                   onChange={(e) =>
                     setFilters({
                       ...filters,
-                      minPrice: e.target.value
-                        ? parseFloat(e.target.value)
-                        : null,
+                      hourlyRate: e.target.value,
                     })
                   }
                   className="h-9"
                 />
               </div>
 
-              {/* Max Price Filter */}
+              {/* Minimum Rating Filter */}
               <div>
                 <label className="mb-2 block text-xs font-medium text-muted-foreground">
-                  Max Price (৳)
+                  Minimum Rating
                 </label>
-                <Input
-                  type="number"
-                  placeholder="No limit"
-                  value={filters.maxPrice ?? ""}
+                <select
+                  value={filters.minAverageRating}
                   onChange={(e) =>
                     setFilters({
                       ...filters,
-                      maxPrice: e.target.value
-                        ? parseFloat(e.target.value)
-                        : null,
+                      minAverageRating: e.target.value,
+                    })
+                  }
+                  className="h-9 w-full rounded border border-border bg-background px-3 text-sm"
+                >
+                  <option value="0">Any Rating</option>
+                  <option value="3">3+ Stars</option>
+                  <option value="4">4+ Stars</option>
+                  <option value="4.5">4.5+ Stars</option>
+                </select>
+              </div>
+
+              {/* Minimum Completed Jobs */}
+              <div>
+                <label className="mb-2 block text-xs font-medium text-muted-foreground">
+                  Minimum Completed Jobs
+                </label>
+                <Input
+                  type="number"
+                  placeholder="e.g., 10"
+                  value={filters.minCompletedJobs}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      minCompletedJobs: e.target.value,
                     })
                   }
                   className="h-9"
@@ -201,8 +223,28 @@ export default function ServicesPage() {
             </div>
           </div>
 
-          {/* Sort Options */}
+          {/* Sort & Availability Options */}
           <div className="flex flex-wrap items-center gap-4 border-t border-border pt-4">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-medium text-muted-foreground">
+                Show:
+              </label>
+              <select
+                value={filters.isAvailable}
+                onChange={(e) =>
+                  setFilters({
+                    ...filters,
+                    isAvailable: e.target.value,
+                  })
+                }
+                className="rounded border border-border bg-background px-3 py-1.5 text-sm"
+              >
+                <option value="true">Available</option>
+                <option value="false">Unavailable</option>
+                <option value="all">All</option>
+              </select>
+            </div>
+
             <div className="flex items-center gap-2">
               <label className="text-xs font-medium text-muted-foreground">
                 Sort by:
@@ -212,13 +254,15 @@ export default function ServicesPage() {
                 onChange={(e) =>
                   setFilters({
                     ...filters,
-                    sortBy: e.target.value as "createdAt" | "price",
+                    sortBy: e.target.value as
+                      "hourlyRate" | "averageRating" | "completedJobs",
                   })
                 }
                 className="rounded border border-border bg-background px-3 py-1.5 text-sm"
               >
-                <option value="createdAt">Newest</option>
-                <option value="price">Price</option>
+                <option value="averageRating">Rating</option>
+                <option value="hourlyRate">Hourly Rate</option>
+                <option value="completedJobs">Jobs Completed</option>
               </select>
             </div>
 
@@ -236,8 +280,8 @@ export default function ServicesPage() {
                 }
                 className="rounded border border-border bg-background px-3 py-1.5 text-sm"
               >
-                <option value="desc">Descending</option>
-                <option value="asc">Ascending</option>
+                <option value="desc">Highest First</option>
+                <option value="asc">Lowest First</option>
               </select>
             </div>
 
@@ -254,97 +298,132 @@ export default function ServicesPage() {
             )}
           </div>
         </div>
+        {/* Pagination */}
+
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious href="#" />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink href="#">1</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink href="#" isActive>
+                2
+              </PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink href="#">3</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext href="#" />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
 
         {/* Results count */}
         <div className="mb-6 text-sm text-muted-foreground">
-          Showing {services.length} service
-          {services.length !== 1 ? "s" : ""}
+          Showing {technicians.length} technician
+          {technicians.length !== 1 ? "s" : ""}
         </div>
 
-        {/* Services Grid */}
-        {services.length > 0 ? (
+        {/* Technicians Grid */}
+        {technicians.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {services.map((service) => (
+            {technicians.map((technician) => (
               <Card
-                key={service.id}
+                key={technician.id}
                 className="flex flex-col transition-shadow duration-300 hover:shadow-lg"
               >
                 <CardHeader>
                   <div className="mb-2 flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <CardTitle className="line-clamp-2 text-xl">
-                        {service.title}
+                        {technician.name}
                       </CardTitle>
                       <CardDescription className="mt-1 line-clamp-2">
-                        {service.description}
+                        {technician.skills && technician.skills.length > 0
+                          ? technician.skills.join(", ")
+                          : "No skills listed"}
                       </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
 
                 <CardContent className="flex flex-1 flex-col gap-4">
-                  {/* Service Details */}
+                  {/* Technician Details */}
                   <div className="space-y-3">
-                    {/* Price */}
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="size-4 text-primary" />
-                      <span className="text-2xl font-bold text-foreground">
-                        ৳{service.price}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        /service
-                      </span>
-                    </div>
-
-                    {/* Duration */}
-                    <div className="flex items-center gap-2">
-                      <Clock className="size-4 text-primary" />
-                      <span className="text-sm text-foreground">
-                        <span className="font-medium">
-                          {service.duration} hours
-                        </span>
-                        <span className="ml-1 text-muted-foreground">
-                          average duration
-                        </span>
-                      </span>
-                    </div>
-
                     {/* Location */}
                     <div className="flex items-center gap-2">
                       <MapPin className="size-4 text-primary" />
                       <span className="text-sm text-foreground">
-                        {service.location}
+                        {technician.location}
+                      </span>
+                    </div>
+
+                    {/* Hourly Rate */}
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="size-4 text-primary" />
+                      <span className="text-2xl font-bold text-foreground">
+                        ৳{technician.hourlyRate}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        /hour
+                      </span>
+                    </div>
+
+                    {/* Rating */}
+                    <div className="flex items-center gap-2">
+                      <Star className="size-4 fill-yellow-400 text-yellow-400" />
+                      <span className="text-sm text-foreground">
+                        {technician.averageRating > 0
+                          ? `${technician.averageRating.toFixed(1)} / 5`
+                          : "No reviews yet"}
+                      </span>
+                    </div>
+
+                    {/* Completed Jobs */}
+                    <div className="flex items-center gap-2">
+                      <Briefcase className="size-4 text-primary" />
+                      <span className="text-sm text-foreground">
+                        {technician.completedJobs} jobs completed
+                      </span>
+                    </div>
+
+                    {/* Availability */}
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`size-2 rounded-full ${technician.isAvailable ? "bg-green-500" : "bg-red-500"}`}
+                      />
+                      <span
+                        className={`text-sm font-medium ${technician.isAvailable ? "text-green-600" : "text-red-600"}`}
+                      >
+                        {technician.isAvailable ? "Available" : "Unavailable"}
                       </span>
                     </div>
                   </div>
 
                   {/* creation date */}
                   <div className="text-xs text-muted-foreground">
-                    Created: {new Date(service.createdAt).toLocaleDateString()}
-                  </div>
-
-                  {/* Rating Placeholder */}
-                  <div className="flex items-center gap-1">
-                    <div className="flex gap-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className="size-4 fill-yellow-400 text-yellow-400"
-                        />
-                      ))}
-                    </div>
-                    <span className="text-sm text-muted-foreground">
-                      (0 reviews)
-                    </span>
+                    Joined:{" "}
+                    {new Date(technician.createdAt).toLocaleDateString()}
                   </div>
 
                   {/* Action Buttons */}
                   <div className="flex gap-2 pt-2">
                     <Button variant="outline" className="flex-1" size="sm">
-                      View Details
+                      View Profile
                     </Button>
-                    <Button className="flex-1" size="sm">
-                      Book Now
+                    <Button
+                      className="flex-1"
+                      size="sm"
+                      disabled={!technician.isAvailable}
+                    >
+                      {technician.isAvailable ? "Book Now" : "Unavailable"}
                     </Button>
                   </div>
                 </CardContent>
@@ -357,7 +436,7 @@ export default function ServicesPage() {
               <MapPin className="mx-auto mb-4 size-12 opacity-50" />
             </div>
             <h3 className="mb-2 text-xl font-semibold text-foreground">
-              No services found
+              No technicians found
             </h3>
             <p className="mb-6 text-muted-foreground">
               Try adjusting your filters to find what you&apos;re looking for

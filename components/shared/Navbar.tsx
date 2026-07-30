@@ -21,6 +21,7 @@ const NAV_ITEMS = [
   { label: "About", href: "#about" },
   { label: "Blog", href: "#blog" },
   { label: "Services", href: "/services" },
+  { label: "Technicians", href: "/technicians" },
 ]
 
 // User dropdown menu items
