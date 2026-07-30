@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -11,8 +11,9 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Clock, DollarSign, Star } from "lucide-react"
-import { getServices } from "../_actions/services"
+import { Input } from "@/components/ui/input"
+import { MapPin, Clock, DollarSign, Star, X } from "lucide-react"
+import { getServices } from "../_actions/serverActions"
 
 interface Service {
   id: string
@@ -21,28 +22,79 @@ interface Service {
   price: string
   duration: number
   location: string
+  type: string
   createdAt: string
   technicianProfileId: string
   categoryId: string
   updatedAt: string
 }
 
-const SAMPLE_SERVICES = await getServices()
-console.log(SAMPLE_SERVICES)
+interface Filters {
+  location: string
+  minPrice: number | null
+  maxPrice: number | null
+  type: string
+  sortBy: "createdAt" | "price"
+  sortOrder: "asc" | "desc"
+}
 
-const LOCATION_FILTERS = ["All", "Dhaka", "Gazipur"]
+const LOCATION_OPTIONS = [
+  "All",
+  "Dhaka",
+  "Gazipur",
+  "Chattogram",
+  "Sylhet",
+  "Rajshahi",
+  "Barishal",
+  "Khulna",
+  "Rangpur",
+]
+const SERVICE_TYPES = ["All", "AC Repair", "PC Repair", "TV Repair"]
 
 export default function ServicesPage() {
-  const [selectedLocation, setSelectedLocation] = useState("All")
-  const [services] = useState<Service[]>(SAMPLE_SERVICES)
+  const [services, setServices] = useState<Service[]>([])
+  const [filters, setFilters] = useState<Filters>({
+    location: "All",
+    minPrice: null,
+    maxPrice: null,
+    type: "All",
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  })
+  console.log(filters)
 
-  const filteredServices =
-    selectedLocation === "All"
-      ? services
-      : services.filter((service) => service.location === selectedLocation)
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const loadServices = await getServices(filters)
+        console.log(loadServices)
+        setServices(loadServices.data)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    fetchServices()
+  }, [filters, setServices])
+
+  const clearFilters = () => {
+    setFilters({
+      location: "All",
+      type: "All",
+      minPrice: null,
+      maxPrice: null,
+      sortBy: "createdAt",
+      sortOrder: "desc",
+    })
+  }
+  const hasActiveFilters =
+    filters.location !== "All" ||
+    filters.type !== "All" ||
+    filters.minPrice !== null ||
+    filters.maxPrice !== null
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen bg-linear-to-b from-background to-muted/20">
       {/* Header */}
       <div className="container mx-auto px-4 py-12">
         <div className="mb-8">
@@ -54,38 +106,165 @@ export default function ServicesPage() {
           </p>
         </div>
 
-        {/* Filters */}
-        <div className="mb-8">
-          <h2 className="mb-4 text-sm font-semibold text-foreground">
-            Filter by Location
-          </h2>
-          <div className="flex flex-wrap gap-3">
-            {LOCATION_FILTERS.map((location) => (
-              <button
-                key={location}
-                onClick={() => setSelectedLocation(location)}
-                className={`rounded-lg px-4 py-2 font-medium transition-colors ${
-                  selectedLocation === location
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
-                }`}
+        {/* Filters Section */}
+        <div className="mb-8 space-y-6 rounded-lg border border-border bg-card p-6">
+          <div>
+            <h2 className="mb-4 text-sm font-semibold text-foreground">
+              Filters
+            </h2>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {/* Location Filter */}
+              <div>
+                <label className="mb-2 block text-xs font-medium text-muted-foreground">
+                  Location
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {LOCATION_OPTIONS.map((location) => (
+                    <button
+                      key={location}
+                      onClick={() => setFilters({ ...filters, location })}
+                      className={`rounded px-3 py-1.5 text-sm font-medium transition-colors ${
+                        filters.location === location
+                          ? "bg-primary text-primary-foreground"
+                          : "border border-border bg-background hover:bg-muted"
+                      }`}
+                    >
+                      {location}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Service Type Filter */}
+              <div>
+                <label className="mb-2 block text-xs font-medium text-muted-foreground">
+                  Service Type
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {SERVICE_TYPES.map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setFilters({ ...filters, type })}
+                      className={`rounded px-3 py-1.5 text-sm font-medium transition-colors ${
+                        filters.type === type
+                          ? "bg-primary text-primary-foreground"
+                          : "border border-border bg-background hover:bg-muted"
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Min Price Filter */}
+              <div>
+                <label className="mb-2 block text-xs font-medium text-muted-foreground">
+                  Min Price (৳)
+                </label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={filters.minPrice ?? ""}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      minPrice: e.target.value
+                        ? parseFloat(e.target.value)
+                        : null,
+                    })
+                  }
+                  className="h-9"
+                />
+              </div>
+
+              {/* Max Price Filter */}
+              <div>
+                <label className="mb-2 block text-xs font-medium text-muted-foreground">
+                  Max Price (৳)
+                </label>
+                <Input
+                  type="number"
+                  placeholder="No limit"
+                  value={filters.maxPrice ?? ""}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      maxPrice: e.target.value
+                        ? parseFloat(e.target.value)
+                        : null,
+                    })
+                  }
+                  className="h-9"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Sort Options */}
+          <div className="flex flex-wrap items-center gap-4 border-t border-border pt-4">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-medium text-muted-foreground">
+                Sort by:
+              </label>
+              <select
+                value={filters.sortBy}
+                onChange={(e) =>
+                  setFilters({
+                    ...filters,
+                    sortBy: e.target.value as "createdAt" | "price",
+                  })
+                }
+                className="rounded border border-border bg-background px-3 py-1.5 text-sm"
               >
-                {location}
-              </button>
-            ))}
+                <option value="createdAt">Newest</option>
+                <option value="price">Price</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-medium text-muted-foreground">
+                Order:
+              </label>
+              <select
+                value={filters.sortOrder}
+                onChange={(e) =>
+                  setFilters({
+                    ...filters,
+                    sortOrder: e.target.value as "asc" | "desc",
+                  })
+                }
+                className="rounded border border-border bg-background px-3 py-1.5 text-sm"
+              >
+                <option value="desc">Descending</option>
+                <option value="asc">Ascending</option>
+              </select>
+            </div>
+
+            {hasActiveFilters && (
+              <Button
+                onClick={clearFilters}
+                variant="ghost"
+                size="sm"
+                className="ml-auto gap-1.5"
+              >
+                <X className="size-4" />
+                Clear Filters
+              </Button>
+            )}
           </div>
         </div>
 
         {/* Results count */}
         <div className="mb-6 text-sm text-muted-foreground">
-          Showing {filteredServices.length} service
-          {filteredServices.length !== 1 ? "s" : ""}
+          Showing {services.length} service
+          {services.length !== 1 ? "s" : ""}
         </div>
 
         {/* Services Grid */}
-        {filteredServices.length > 0 ? (
+        {services.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredServices.map((service) => (
+            {services.map((service) => (
               <Card
                 key={service.id}
                 className="flex flex-col transition-shadow duration-300 hover:shadow-lg"
@@ -178,12 +357,11 @@ export default function ServicesPage() {
             <p className="mb-6 text-muted-foreground">
               Try adjusting your filters to find what you&apos;re looking for
             </p>
-            <Button
-              onClick={() => setSelectedLocation("All")}
-              variant="outline"
-            >
-              Clear Filters
-            </Button>
+            {hasActiveFilters && (
+              <Button onClick={clearFilters} variant="outline">
+                Clear Filters
+              </Button>
+            )}
           </div>
         )}
       </div>
