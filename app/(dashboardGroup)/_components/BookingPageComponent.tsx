@@ -348,7 +348,7 @@ const BookingPageComponent = () => {
                         )}
                       </div>
 
-                      {/* ✅ Right Section - Technician Actions */}
+                      {/*  Right Section - Technician Actions */}
                       <div className="flex flex-col gap-2 md:w-40">
                         {/* REQUESTED - Technician can Accept or Decline */}
                         {booking.status === "REQUESTED" && (

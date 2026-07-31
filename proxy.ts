@@ -88,7 +88,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url))
   }
 
-  // ✅ Authorization: Role based access control (Fixed)
+  // Authorization: Role based access control (Fixed)
   if (pathName.startsWith("/dashboard/admin") && userRole !== "ADMIN") {
     return NextResponse.redirect(new URL("/not-found", request.url))
   } else if (

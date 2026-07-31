@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/pagination"
 import { useSearchParams } from "next/navigation"
 
-// ✅ Update the Technician interface to match the actual response
+//   Update the Technician interface to match the actual response
 interface Technician {
   id: string
   userId: string

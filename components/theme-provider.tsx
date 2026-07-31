@@ -49,7 +49,7 @@ function ThemeHotkey() {
         return
       }
 
-      // ✅ FIX: Check if event.key exists before calling toLowerCase()
+      //   FIX: Check if event.key exists before calling toLowerCase()
       if (!event.key || event.key.toLowerCase() !== "d") {
         return
       }

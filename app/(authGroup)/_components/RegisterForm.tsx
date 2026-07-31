@@ -183,7 +183,7 @@ const RegisterForm = () => {
           )}
         </div>
 
-        {/* ✅ Simple Radio Buttons - No Select API issues! */}
+        {/*  Simple Radio Buttons - No Select API issues! */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-foreground">
             I am a

@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LayoutDashboard, LogOut, Settings, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { logout } from "@/service/logout"
+import { IUser } from "@/lib/types/UserTypes"
 
 // Organized navigation items
 const NAV_ITEMS = [
@@ -31,25 +32,6 @@ const USER_MENU_ITEMS = [
   { label: "Settings", icon: Settings, action: "settings" },
   { label: "Logout", icon: LogOut, action: "logout" },
 ]
-
-type IUser = {
-  success: boolean
-  statusCode: number
-  message: string
-  data: {
-    id: string
-    name: string
-    email: string
-    phone: string
-    location: string
-    role: string
-    status: string
-    profileImage?: string
-    stripeCustomerId?: string | null
-    createdAt: string
-    updatedAt: string
-  }
-}
 
 export function Navbar({ user }: { user?: IUser }) {
   const router = useRouter()

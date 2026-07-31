@@ -1,5 +1,8 @@
 "use server"
 
+import { useId } from "react"
+import { success } from "zod"
+
 type IFilter = {
   location: string
   sortBy: "createdAt" | "price" | "title"
@@ -94,4 +97,21 @@ export const getTechnicians = async (filter: ITechnicianFilters) => {
   )
 
   return res.json()
+}
+
+export const getServicesOfferedByThisTechnician = async (userId: string) => {
+  if (!useId) {
+    return {
+      success: false,
+      message: "Technician not found",
+    }
+  }
+
+  const res = await fetch(
+    `${process.env.BACKEND_API_URL}/api/services/${userId}`
+  )
+
+  const result = res.json()
+
+  return result
 }
