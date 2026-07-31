@@ -12,39 +12,79 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { Home, Wrench, User, Settings, BarChart3, LogOut } from "lucide-react"
+import {
+  Home,
+  Wrench,
+  User,
+  Settings,
+  BarChart3,
+  LogOut,
+  Calendar,
+  Briefcase,
+  Users,
+  LayoutDashboard,
+  UserCog,
+} from "lucide-react"
 import { useState } from "react"
 import Image from "next/image"
 import { IDashBoardSidebarProps, IUser } from "@/lib/types/types"
 
 export function DashBoardSidebar({ user }: IDashBoardSidebarProps) {
-  console.log(user)
   const pathname = usePathname()
+  const userRole = user.data.role
+
   const MAIN_MENU_ITEMS = [
     {
       title: "Home",
       icon: Home,
       href: "/",
+      show: true,
     },
     {
       title: "Services",
       icon: Wrench,
       href: "/services",
+      show: true,
     },
     {
-      title: "Profile",
+      title: "Technicians",
+      icon: Users,
+      href: "/technicians",
+      show: true,
+    },
+    {
+      title: "My Profile",
       icon: User,
       href: "/profile",
+      show: true,
     },
     {
       title: "Technician Profile",
-      icon: User,
+      icon: UserCog,
       href: `/dashboard/technician/profile/${user.data.id}`,
+      show: userRole === "TECHNICIAN",
     },
     {
       title: "Dashboard",
-      icon: BarChart3,
-      href: "/dashboard",
+      icon: LayoutDashboard,
+      href:
+        userRole === "ADMIN"
+          ? "/dashboard/admin"
+          : userRole === "TECHNICIAN"
+            ? "/dashboard/technician"
+            : "/dashboard/customer",
+      show: true,
+    },
+    {
+      title: "Bookings",
+      icon: Calendar,
+      href:
+        userRole === "ADMIN"
+          ? "/dashboard/admin/bookings"
+          : userRole === "TECHNICIAN"
+            ? `/dashboard/technician/bookings/${user.data.id}`
+            : "/dashboard/customer/bookings",
+      show: true,
     },
   ]
 
@@ -61,7 +101,9 @@ export function DashBoardSidebar({ user }: IDashBoardSidebarProps) {
     },
   ]
 
-  const isActive = (href: string) => pathname === href
+  const isActive = (href: string) => {
+    if (pathname === href) return true
+  }
 
   return (
     <Sidebar collapsible="icon">
@@ -80,7 +122,7 @@ export function DashBoardSidebar({ user }: IDashBoardSidebarProps) {
               "https://i.ibb.co.com/4RbwjM0G/man-empty-avatar-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-and-fema.jpg"
             }
             alt="Profile-image"
-          ></Image>
+          />
           <h3 className="text-center">{user.data.name}</h3>
         </Link>
       </SidebarHeader>
@@ -89,24 +131,18 @@ export function DashBoardSidebar({ user }: IDashBoardSidebarProps) {
         <SidebarMenu>
           {/* Main Menu Items */}
           {MAIN_MENU_ITEMS.map((item) => {
+            // Skip if show is false
+            if (!item.show) return null
+
             const Icon = item.icon
             const isItemActive = isActive(item.href)
 
             return (
-              <SidebarMenuItem
-                className={
-                  item.title === "Technician Profile" &&
-                  user.data.role !== "TECHNICIAN"
-                    ? "hidden"
-                    : ""
-                }
-                key={item.title}
-              >
+              <SidebarMenuItem key={item.title}>
                 <Link href={item.href}>
                   <SidebarMenuButton
                     isActive={isItemActive}
-
-                    className={isItemActive ? "bg-accent" : ""}
+                    className={isItemActive ? "text-md bg-accent" : ""}
                   >
                     <Icon className="size-4" />
                     <span>{item.title}</span>

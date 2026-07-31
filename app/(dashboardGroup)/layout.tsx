@@ -28,7 +28,7 @@ export default async function RootLayout({
         <div className="flex h-screen flex-col">
           <div className="flex flex-1">
             <DashBoardSidebar user={user} />
-            <main className="flex-1 overflow-y-auto xl:pl-20 2xl:pl-64">
+            <main className="flex-1 overflow-y-auto xl:pl-20 2xl:pl-30">
               {children}
             </main>
           </div>
