@@ -13,9 +13,6 @@ import { getMe } from "@/service/getMe"
 import { Mail, MapPin, Phone, Calendar, Shield, Edit2 } from "lucide-react"
 import Link from "next/link"
 
-const user = await getMe()
-const userData = user.data
-
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString("en-US", {
     year: "numeric",
@@ -46,7 +43,9 @@ const getStatusColor = (status: string) => {
   }
 }
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const user = await getMe()
+  const userData = user.data
   return (
     <div className="min-h-screen bg-linear-to-b from-background to-muted/10">
       <div className="container mx-auto max-w-4xl px-4 py-8">

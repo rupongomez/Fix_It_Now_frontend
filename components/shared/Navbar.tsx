@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogOut, Settings, User } from "lucide-react"
+import { LayoutDashboard, LogOut, Settings, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { logout } from "@/service/logout"
 
@@ -27,6 +27,7 @@ const NAV_ITEMS = [
 // User dropdown menu items
 const USER_MENU_ITEMS = [
   { label: "Profile", icon: User, action: "profile" },
+  { label: "Dashboard", icon: LayoutDashboard, action: "dashboard" },
   { label: "Settings", icon: Settings, action: "settings" },
   { label: "Logout", icon: LogOut, action: "logout" },
 ]
@@ -59,6 +60,14 @@ export function Navbar({ user }: { user?: IUser }) {
       router.push("/profile")
     } else if (action === "settings") {
       router.push("/settings")
+    } else if (action === "dashboard") {
+      if (user?.data.role === "CUSTOMER") {
+        router.push("/dashboard/customer")
+      } else if (user?.data.role === "ADMIN") {
+        router.push("/dashboard/admin")
+      } else if (user?.data.role === "TECHNICIAN") {
+        router.push("/dashboard/technician")
+      }
     } else if (action === "logout") {
       await logout()
     }
@@ -93,7 +102,12 @@ export function Navbar({ user }: { user?: IUser }) {
           <DropdownMenu>
             <DropdownMenuTrigger className="flex cursor-pointer items-center gap-2 rounded-lg pr-3 pl-2 transition-colors outline-none hover:bg-accent">
               <Avatar className="size-8">
-                <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+                <AvatarImage
+                  src={
+                    user.data.profileImage || "https://github.com/shadcn.png"
+                  }
+                  alt="User"
+                />
                 <AvatarFallback>JD</AvatarFallback>
               </Avatar>
               <span className="hidden text-sm font-medium sm:inline">

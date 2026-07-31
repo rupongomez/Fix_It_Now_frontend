@@ -6,6 +6,9 @@ type IFilter = {
   sortOrder: "asc" | "desc"
   minPrice: number | null
   maxPrice: number | null
+  page: number
+  limit: number
+  searchTerms?: string
 }
 
 export const getServices = async (filters: IFilter) => {
@@ -26,6 +29,9 @@ export const getServices = async (filters: IFilter) => {
     params.set("maxPrice", filters.maxPrice.toString())
   }
 
+  if (filters.searchTerms) {
+    params.set("searchTerms", filters.searchTerms)
+  }
   const res = await fetch(
     `${process.env.BACKEND_API_URL}/api/services?${params.toString()}`
   )
@@ -40,8 +46,9 @@ interface ITechnicianFilters {
   minCompletedJobs: string
   sortBy: "hourlyRate" | "averageRating" | "completedJobs"
   sortOrder: "asc" | "desc"
-  page?: number
-  limit?: number
+  page: number
+  limit: number
+  searchTerms?: string
 }
 
 export const getTechnicians = async (filter: ITechnicianFilters) => {
@@ -58,9 +65,11 @@ export const getTechnicians = async (filter: ITechnicianFilters) => {
   if (filter.minAverageRating !== null) {
     params.set("minAverageRating", filter.minAverageRating)
   }
-  if (filter.isAvailable !== null) {
+
+  if (filter.isAvailable === "true" || filter.isAvailable === "false") {
     params.set("isAvailable", filter.isAvailable)
   }
+
   if (filter.minCompletedJobs !== null) {
     params.set("minCompletedJobs", filter.minCompletedJobs)
   }
@@ -69,6 +78,15 @@ export const getTechnicians = async (filter: ITechnicianFilters) => {
   }
   if (filter.sortOrder !== null) {
     params.set("sortOrder", filter.sortOrder)
+  }
+  if (filter.page !== null) {
+    params.set("page", filter.page.toString())
+  }
+  if (filter.limit !== null) {
+    params.set("limit", filter.limit.toString())
+  }
+  if (filter.searchTerms) {
+    params.set("searchTerms", filter.searchTerms)
   }
 
   const res = await fetch(
