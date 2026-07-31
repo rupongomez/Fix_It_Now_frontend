@@ -23,28 +23,17 @@ export default async function RootLayout({
   const user = await getMe()
 
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={cn(
-        "antialiased",
-        fontMono.variable,
-        "font-sans",
-        inter.variable
-      )}
-    >
-      <body>
-        <SidebarProvider>
-          <div className="flex h-screen flex-col">
-            <div className="flex flex-1">
-              <DashBoardSidebar user={user} />
-              <main className="flex-1 overflow-y-auto xl:pl-20 2xl:pl-64">
-                {children}
-              </main>
-            </div>
+    <div>
+      <SidebarProvider>
+        <div className="flex h-screen flex-col">
+          <div className="flex flex-1">
+            <DashBoardSidebar user={user} />
+            <main className="flex-1 overflow-y-auto xl:pl-20 2xl:pl-64">
+              {children}
+            </main>
           </div>
-        </SidebarProvider>
-      </body>
-    </html>
+        </div>
+      </SidebarProvider>
+    </div>
   )
 }

@@ -52,7 +52,6 @@ type IUser = {
 }
 
 export function Navbar({ user }: { user?: IUser }) {
-  console.log(user)
   const router = useRouter()
 
   const handleUserMenuAction = async (action: string) => {

@@ -5,8 +5,8 @@ import { redirect } from "next/navigation"
 import { logout } from "./service/logout"
 import { JwtPayload } from "jsonwebtoken"
 import { getNewAccessToken } from "./service/getNewAccessToken"
-const AUTH_ROUTES = ["/login", "/register"]
 
+const AUTH_ROUTES = ["/login", "/register"]
 const PUBLIC_ROUTES = ["/", "/services", "/technicians"]
 const PROTECTED_ROUTES = ["/profile", "/dashboard", "/bookings", "/payments"]
 
@@ -26,7 +26,7 @@ export async function proxy(request: NextRequest) {
         process.env.JWT_REFRESH_SECRET as string
       )
     : null
-  //   console.log(decodedRefreshToken)
+
   if (!decodedAccessToken?.success && decodedRefreshToken?.success) {
     const result = await getNewAccessToken()
     const newAccessToken = result.data.accessToken
@@ -81,7 +81,6 @@ export async function proxy(request: NextRequest) {
   if (!accessToken && !isPublicRoute && !isAuthRoute) {
     const loginUrl = new URL("/login", request.url)
     loginUrl.searchParams.set("redirectTo", pathName)
-
     return NextResponse.redirect(loginUrl)
   }
 
@@ -89,7 +88,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url))
   }
 
-  // Authorization : Role based access control
+  // ✅ Authorization: Role based access control (Fixed)
   if (pathName.startsWith("/dashboard/admin") && userRole !== "ADMIN") {
     return NextResponse.redirect(new URL("/not-found", request.url))
   } else if (
@@ -108,9 +107,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    // '/dashboard/:path*',
-    // '/admin-dashboard/:path*',
-    "/((?!api|_next/static|favicon.ico|_next/image|.*\\.png$).*)",
-  ],
+  matcher: ["/((?!api|_next/static|favicon.ico|_next/image|.*\\.png$).*)"],
 }

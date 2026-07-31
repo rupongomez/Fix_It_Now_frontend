@@ -15,52 +15,51 @@ import {
 import { Home, Wrench, User, Settings, BarChart3, LogOut } from "lucide-react"
 import { useState } from "react"
 import Image from "next/image"
-import { IDashBoardSidebarProps, IUser } from "@/lib/types"
-
-const MAIN_MENU_ITEMS = [
-  {
-    title: "Home",
-    icon: Home,
-    href: "/",
-  },
-  {
-    title: "Services",
-    icon: Wrench,
-    href: "/services",
-  },
-  {
-    title: "Profile",
-    icon: User,
-    href: "/profile",
-  },
-  {
-    title: "Technician Profile",
-    icon: User,
-    href: "/technician-profile",
-  },
-  {
-    title: "Dashboard",
-    icon: BarChart3,
-    href: "/dashboard",
-  },
-]
-
-const SETTINGS_ITEMS = [
-  {
-    title: "Settings",
-    icon: Settings,
-    href: "/settings",
-  },
-  {
-    title: "Logout",
-    icon: LogOut,
-    href: "/logout",
-  },
-]
+import { IDashBoardSidebarProps, IUser } from "@/lib/types/types"
 
 export function DashBoardSidebar({ user }: IDashBoardSidebarProps) {
   console.log(user)
   const pathname = usePathname()
+  const MAIN_MENU_ITEMS = [
+    {
+      title: "Home",
+      icon: Home,
+      href: "/",
+    },
+    {
+      title: "Services",
+      icon: Wrench,
+      href: "/services",
+    },
+    {
+      title: "Profile",
+      icon: User,
+      href: "/profile",
+    },
+    {
+      title: "Technician Profile",
+      icon: User,
+      href: `/dashboard/technician/profile/${user.data.id}`,
+    },
+    {
+      title: "Dashboard",
+      icon: BarChart3,
+      href: "/dashboard",
+    },
+  ]
+
+  const SETTINGS_ITEMS = [
+    {
+      title: "Settings",
+      icon: Settings,
+      href: "/settings",
+    },
+    {
+      title: "Logout",
+      icon: LogOut,
+      href: "/logout",
+    },
+  ]
 
   const isActive = (href: string) => pathname === href
 

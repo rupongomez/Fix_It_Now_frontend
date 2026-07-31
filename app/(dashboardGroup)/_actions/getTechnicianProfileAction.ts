@@ -26,6 +26,13 @@ export const getTechnicianProfileById = async (id: string) => {
     }
   }
 
+  if (verifiedToken.data.id !== id) {
+    return {
+      success: false,
+      message: "Forbidden access",
+    }
+  }
+
   const res = await fetch(
     `${process.env.BACKEND_API_URL}/api/technician/profile/${id}`
   )

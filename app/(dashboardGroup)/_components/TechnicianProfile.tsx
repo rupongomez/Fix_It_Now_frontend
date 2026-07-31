@@ -1,7 +1,6 @@
 "use client"
-import React, { useEffect } from "react"
+import { useEffect } from "react"
 import { useState } from "react"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -12,12 +11,9 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Star,
   MapPin,
-  Clock,
-  DollarSign,
   CheckCircle2,
   AlertCircle,
   Briefcase,
@@ -25,8 +21,7 @@ import {
   Share2,
 } from "lucide-react"
 import { useParams } from "next/navigation"
-import { getTechnicianProfileById } from "@/app/(dashboardGroup)/_actions/ServerAction"
-import { toast } from "sonner"
+import { getTechnicianProfileById } from "@/app/(dashboardGroup)/_actions/getTechnicianProfileAction"
 import { TechnicianProfileSkeleton } from "./TechnicianPrfileLoadingSkeleton"
 
 interface IReview {
@@ -59,32 +54,19 @@ interface TechnicianProfile {
   }
 }
 
-// Mock technician data - replace with API call
-// const : TechnicianProfile = {
-//   id: "8bef2c75-38f4-4c46-a271-2983df822121",
-//   userId: "8e062317-2c53-451e-8ee6-65d1cc06b4aa",
-//   bio: "I fix everything from leaks to electrical issues. Fast response, clear pricing.",
-//   experience: 4,
-//   hourlyRate: "25.5",
-//   averageRating: 3,
-//   completedJobs: 10,
-//   location: "Sylhet",
-//   isAvailable: false,
-//   createdAt: "2026-07-09T09:58:25.050Z",
-//   updatedAt: "2026-07-09T09:58:25.050Z",
-//   reviews: [],
-// }
 const TechnicianProfile = () => {
   const [technicianData, setTechnicianData] =
     useState<TechnicianProfile | null>(null)
   const [isFollowing, setIsFollowing] = useState(false)
   const [loading, setLoading] = useState(false)
+
   const params = useParams()
 
   useEffect(() => {
     const fetchTechnician = async () => {
       try {
         setLoading(true)
+
         const getTechnicianProfile = await getTechnicianProfileById(
           params.id as string
         )
@@ -119,66 +101,74 @@ const TechnicianProfile = () => {
   }
 
   return (
-    <div>
-      {/* Header Card */}
-      <Card className="mb-8 overflow-hidden border-0 shadow-lg">
-        <div className="h-32 bg-linear-to-r from-primary/20 to-primary/10" />
-        <CardContent className="relative -mt-16 px-6 pb-6">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-            {/* Profile Info */}
-            <div className="flex gap-4">
-              <Avatar className="size-32 border-4 border-background">
-                <AvatarImage
-                  src="https://i.pravatar.cc/300?img=5"
-                  alt="Technician"
-                />
-                <AvatarFallback>Tech</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-1 flex-col justify-end pb-2">
-                <h1 className="text-3xl font-bold text-foreground">
-                  John Smith
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  Professional Technician
-                </p>
-                <div className="mt-2 flex items-center gap-2">
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-4xl font-bold text-foreground">
+            Technician Profile
+          </h1>
+          <p className="mt-1 text-muted-foreground">
+            View detailed information and book services
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={isFollowing ? "default" : "outline"}
+            onClick={() => setIsFollowing(!isFollowing)}
+          >
+            {isFollowing ? "Following" : "Follow"}
+          </Button>
+          <Button variant="outline" size="icon">
+            <MessageSquare className="size-4" />
+          </Button>
+          <Button variant="outline" size="icon">
+            <Share2 className="size-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Rating Overview */}
+      <Card className="bg-gradient-to-br from-primary/5 to-primary/10">
+        <CardContent className="py-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <div>
+                <div className="mb-1 flex items-center gap-2">
                   <div className="flex gap-1">
                     {renderStars(technician.averageRating)}
                   </div>
-                  <span className="text-sm font-medium text-foreground">
+                  <span className="text-2xl font-bold text-foreground">
                     {technician.averageRating.toFixed(1)}
                   </span>
-                  <span className="text-sm text-muted-foreground">
-                    ({technician.completedJobs} reviews)
-                  </span>
                 </div>
+                <p className="text-sm text-muted-foreground">
+                  Based on {technician.completedJobs} completed jobs
+                </p>
               </div>
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              <Button
-                variant={isFollowing ? "default" : "outline"}
-                onClick={() => setIsFollowing(!isFollowing)}
-                className="gap-2"
-              >
-                {isFollowing ? "Following" : "Follow"}
-              </Button>
-              <Button className="gap-2">
-                <MessageSquare className="size-4" />
-                Message
-              </Button>
-              <Button variant="outline" size="icon">
-                <Share2 className="size-4" />
-              </Button>
+            <div className="flex items-center gap-6">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-foreground">
+                  {technician.experience}
+                </p>
+                <p className="text-xs text-muted-foreground">Years Exp.</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-foreground">
+                  {technician.completedJobs}
+                </p>
+                <p className="text-xs text-muted-foreground">Jobs Done</p>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid gap-8 md:grid-cols-3">
-        {/* Main Content */}
-        <div className="space-y-6 md:col-span-2">
+      {/* Main Grid */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Left Column - Main Content */}
+        <div className="space-y-6 lg:col-span-2">
           {/* About Section */}
           <Card>
             <CardHeader>
@@ -191,7 +181,7 @@ const TechnicianProfile = () => {
             </CardContent>
           </Card>
 
-          {/* Bio & Expertise */}
+          {/* Experience & Skills */}
           <Card>
             <CardHeader>
               <CardTitle>Experience & Skills</CardTitle>
@@ -201,10 +191,10 @@ const TechnicianProfile = () => {
                 <Briefcase className="mt-1 size-5 text-primary" />
                 <div>
                   <h3 className="font-semibold text-foreground">
-                    Years of Experience
+                    Professional Experience
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {technician.experience} years working in the field
+                    {technician.experience} years in the field
                   </p>
                 </div>
               </div>
@@ -213,10 +203,10 @@ const TechnicianProfile = () => {
                 <CheckCircle2 className="mt-1 size-5 text-green-500" />
                 <div>
                   <h3 className="font-semibold text-foreground">
-                    Completed Jobs
+                    Successfully Completed
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Successfully completed {technician.completedJobs} jobs
+                    {technician.completedJobs} jobs with satisfaction
                   </p>
                 </div>
               </div>
@@ -234,21 +224,24 @@ const TechnicianProfile = () => {
             <CardContent>
               {technician.reviews && technician.reviews.length > 0 ? (
                 <div className="space-y-4">
-                  {technician.reviews.map((review, index) => (
+                  {technician.reviews.map((review) => (
                     <div
-                      key={index}
+                      key={review.id}
                       className="border-b border-border pb-4 last:border-0"
                     >
                       <div className="mb-2 flex items-center justify-between">
-                        <h4 className="font-semibold text-foreground">
-                          Reviewer Name
-                        </h4>
+                        <span className="font-medium text-foreground">
+                          Customer Review
+                        </span>
                         <div className="flex gap-1">
-                          {renderStars(review.rating || 5)}
+                          {renderStars(review.rating)}
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {review.comment}
+                      </p>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        {new Date(review.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                   ))}
@@ -257,7 +250,7 @@ const TechnicianProfile = () => {
                 <div className="rounded-lg bg-muted/50 p-6 text-center">
                   <MessageSquare className="mx-auto mb-3 size-8 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">
-                    No reviews yet. Be the first to review this technician!
+                    No reviews yet. Be the first to review!
                   </p>
                 </div>
               )}
@@ -265,7 +258,7 @@ const TechnicianProfile = () => {
           </Card>
         </div>
 
-        {/* Sidebar */}
+        {/* Right Column - Quick Info */}
         <div className="space-y-6">
           {/* Availability Card */}
           <Card
@@ -283,15 +276,15 @@ const TechnicianProfile = () => {
                   <AlertCircle className="size-6 text-red-500" />
                 )}
                 <div>
-                  <p className="text-sm font-medium text-foreground">
+                  <p className="text-sm font-semibold text-foreground">
                     {technician.isAvailable
                       ? "Available Now"
                       : "Currently Unavailable"}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {technician.isAvailable
-                      ? "Ready to take new projects"
-                      : "Check back later"}
+                      ? "Ready for new projects"
+                      : "Check back soon"}
                   </p>
                 </div>
               </div>
@@ -301,23 +294,17 @@ const TechnicianProfile = () => {
           {/* Pricing Card */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Pricing</CardTitle>
+              <CardTitle className="text-lg">Hourly Rate</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between rounded-lg bg-muted/50 p-4">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="size-5 text-primary" />
-                  <span className="text-sm text-muted-foreground">
-                    Hourly Rate
-                  </span>
-                </div>
-                <span className="text-2xl font-bold text-foreground">
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">Starting from</p>
+                <p className="text-4xl font-bold text-foreground">
                   ৳{technician.hourlyRate}
-                </span>
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">per hour</p>
               </div>
-              <Button className="w-full" size="lg">
-                Book Now
-              </Button>
+              <Button className="w-full">Book Now</Button>
             </CardContent>
           </Card>
 
@@ -334,31 +321,19 @@ const TechnicianProfile = () => {
                     {technician.location}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Primary service location
+                    Primary location
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Stats */}
+          {/* Member Info */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Quick Stats</CardTitle>
+              <CardTitle className="text-lg">Member Info</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">
-                  Experience
-                </span>
-                <Badge variant="secondary">{technician.experience} years</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">
-                  Jobs Completed
-                </span>
-                <Badge variant="secondary">{technician.completedJobs}</Badge>
-              </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">
                   Member Since
@@ -369,6 +344,13 @@ const TechnicianProfile = () => {
                     month: "short",
                   })}
                 </Badge>
+              </div>
+              <Separator />
+              <div className="py-2 text-center">
+                <p className="text-xs text-muted-foreground">ID</p>
+                <p className="truncate font-mono text-xs text-foreground">
+                  {technician.id}
+                </p>
               </div>
             </CardContent>
           </Card>
