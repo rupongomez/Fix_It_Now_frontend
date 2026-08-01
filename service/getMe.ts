@@ -6,7 +6,7 @@ import { JwtPayload } from "jsonwebtoken"
 export const getMe = async () => {
   const cookieStore = await cookies()
   const accessToken = cookieStore.get("accessToken")
-
+  console.log(accessToken)
   if (!accessToken) {
     return {
       success: false,

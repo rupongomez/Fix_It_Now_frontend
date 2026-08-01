@@ -30,8 +30,9 @@ import Image from "next/image"
 import { IDashBoardSidebarProps, IUser } from "@/lib/types/types"
 
 export function DashBoardSidebar({ user }: IDashBoardSidebarProps) {
+  console.log(user)
   const pathname = usePathname()
-  const userRole = user.data.role
+  const userRole = user?.data?.role
 
   const MAIN_MENU_ITEMS = [
     {

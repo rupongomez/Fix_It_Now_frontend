@@ -4,6 +4,7 @@ import { cookies } from "next/headers"
 export const getNewAccessToken = async () => {
   const cookieStore = await cookies()
   const refreshToken = cookieStore.get("refreshToken")
+
   if (!refreshToken) {
     return {
       success: false,

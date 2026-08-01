@@ -26,11 +26,10 @@ export async function proxy(request: NextRequest) {
         process.env.JWT_REFRESH_SECRET as string
       )
     : null
-
   if (!decodedAccessToken?.success && decodedRefreshToken?.success) {
     const result = await getNewAccessToken()
-    const newAccessToken = result.data.accessToken
-    console.log(newAccessToken)
+
+    const newAccessToken = result?.data?.accessToken
 
     if (result.success) {
       cookieStore.set("accessToken", newAccessToken, {
@@ -88,7 +87,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url))
   }
 
-  // Authorization: Role based access control (Fixed)
+  // Authorization: Role based access control
   if (pathName.startsWith("/dashboard/admin") && userRole !== "ADMIN") {
     return NextResponse.redirect(new URL("/not-found", request.url))
   } else if (
