@@ -22,10 +22,13 @@ import {
   Briefcase,
 } from "lucide-react"
 import { toast } from "sonner"
-import { getServicesOfferedByThisTechnician } from "../../_actions/serverActions"
+
 import { getMe } from "@/service/getMe"
 import { IUser } from "@/lib/types/UserTypes"
 import { IService } from "@/lib/types/ServiceTypes"
+import { getServicesOfferedByThisTechnician } from "@/app/(publicGroup)/_actions/serverActions"
+import { checkoutService } from "@/app/(publicGroup)/_actions/checkoutAction"
+import Link from "next/link"
 
 export default function TechnicianServicesPage() {
   const [services, setServices] = useState<IService[]>([])
@@ -68,11 +71,15 @@ export default function TechnicianServicesPage() {
     })
   }
 
-  const handleBookService = (serviceId: string) => {
-    // TODO: Implement booking flow
-    toast.info("Booking service: " + serviceId)
+  const handleBookService = async (serviceId: string) => {
+    try {
+      const makePayment = await checkoutService(serviceId)
+      console.log(makePayment)
+    } catch (error) {
+      console.log(error)
+    }
   }
-
+  console.log(services)
   // Loading state
   if (isLoading) {
     return (
@@ -249,13 +256,15 @@ export default function TechnicianServicesPage() {
                   </div>
                 </div>
 
-                <Button
-                  className="mt-auto w-full"
-                  onClick={() => handleBookService(service.id)}
-                  disabled={!technician?.isAvailable}
-                >
-                  {technician?.isAvailable ? "Book Now" : "Unavailable"}
-                </Button>
+                <Link href={`/services/${service.id}`}>
+                  <Button
+                    className="mt-auto w-full"
+
+                    disabled={!technician?.isAvailable}
+                  >
+                    {technician?.isAvailable ? "Book Now" : "Unavailable"}
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}
