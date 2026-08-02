@@ -24,6 +24,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { getServiceDetails } from "@/app/(publicGroup)/_actions/serviceDetailsAction"
+import { BookingModal } from "@/app/(publicGroup)/_components/BookingModal"
 
 interface ServiceData {
   id: string
@@ -49,6 +50,7 @@ export default function ServiceDetailsPage() {
   const [service, setService] = useState<ServiceData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isBooking, setIsBooking] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const params = useParams()
   const router = useRouter()
@@ -61,6 +63,7 @@ export default function ServiceDetailsPage() {
         const response = await getServiceDetails(params.id as string)
 
         if (response.success && response.data) {
+          console.log(response.data.technicianProfileId)
           setService(response.data)
         } else {
           setError(response.message || "Service not found")
@@ -79,18 +82,6 @@ export default function ServiceDetailsPage() {
       fetchService()
     }
   }, [params.id])
-
-  const handleBookNow = async () => {
-    setIsBooking(true)
-    try {
-      const serviceDetails = await getServiceDetails()
-    } catch (error) {
-      console.log(error)
-    }
-
-    // Navigate to booking page
-    router.push(`/services/${params.id}/book`)
-  }
 
   const handleShare = async () => {
     try {
@@ -269,7 +260,7 @@ export default function ServiceDetailsPage() {
           {/* What's Included */}
           <div className="space-y-4">
             <h3 className="text-xl font-semibold text-foreground">
-              What's Included
+              What`&apos;`s Included
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-start gap-3">
@@ -382,11 +373,21 @@ export default function ServiceDetailsPage() {
                   </div>
                 </div>
 
+                {/* Booking modal */}
+
+                <Button>
+                  <BookingModal
+                    open={modalOpen}
+                    onOpenChange={setModalOpen}
+                    service={service}
+                  />
+                </Button>
+
                 <Button
                   size="lg"
                   className="w-full bg-white font-semibold text-primary hover:bg-white/90"
-                  onClick={handleBookNow}
-                  disabled={isBooking}
+                  onClick={() => setModalOpen(true)}
+                  disabled={isBooking || !service}
                 >
                   {isBooking ? (
                     <>

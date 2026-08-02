@@ -113,7 +113,7 @@ const topTechnicians = [
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+    <main className="min-h-screen bg-linear-to-b from-background to-muted/30">
       {/* Hero Section */}
       <section className="px-4 py-20 sm:py-32">
         <div className="mx-auto max-w-6xl">
@@ -179,8 +179,8 @@ export default function HomePage() {
             {/* Right Visual */}
             <div className="hidden items-center justify-center md:flex">
               <div className="relative aspect-square w-full max-w-sm">
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/20 to-primary/5 blur-3xl" />
-                <div className="relative flex flex-col items-center justify-center space-y-6 rounded-3xl bg-gradient-to-br from-primary/10 to-primary/5 p-8">
+                <div className="absolute inset-0 rounded-3xl bg-linear-to-br from-primary/20 to-primary/5 blur-3xl" />
+                <div className="relative flex flex-col items-center justify-center space-y-6 rounded-3xl bg-linear-to-br from-primary/10 to-primary/5 p-8">
                   <div className="text-8xl">🔧</div>
                   <p className="text-center text-sm text-muted-foreground">
                     Professional services at your doorstep

@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/pagination"
 import { SearchBar } from "./SearchBar"
 import { useSearchParams } from "next/navigation"
+import Link from "next/link"
 
 interface Service {
   id: string
@@ -419,14 +420,14 @@ const ServiceGrid = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-2 pt-2">
-                  <Button variant="outline" className="flex-1" size="sm">
+                <Link
+                  href={`/services/details/${service.id}`}
+                  className="flex gap-2 pt-2"
+                >
+                  <Button className="flex-1" size="sm">
                     View Details
                   </Button>
-                  <Button className="flex-1" size="sm">
-                    Book Now
-                  </Button>
-                </div>
+                </Link>
               </CardContent>
             </Card>
           ))}
