@@ -5,6 +5,9 @@ export const checkoutService = async (serviceId: string) => {
   const cookieStore = await cookies()
   const accessToken = cookieStore.get("accessToken")
 
+  const payload = {
+    bookingId: serviceId,
+  }
   const res = await fetch(
     `${process.env.BACKEND_API_URL}/api/payments/checkout`,
     {
@@ -13,11 +16,11 @@ export const checkoutService = async (serviceId: string) => {
         "Content-Type": "application/json",
         Authorization: `${accessToken?.value}`,
       },
-      body: JSON.stringify(serviceId),
+      body: JSON.stringify(payload),
     }
   )
 
-  console.log(res)
   const result = await res.json()
+  console.log(result)
   return result
 }

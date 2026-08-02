@@ -24,6 +24,8 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { useSearchParams } from "next/navigation"
+import { getMe } from "@/service/getMe"
+import { IUser } from "@/lib/types/UserTypes"
 
 //   Update the Technician interface to match the actual response
 interface Technician {
@@ -76,11 +78,26 @@ const LOCATION_OPTIONS = [
   "Khulna",
   "Rangpur",
 ]
+
+type User = {
+  id: string
+  name: string
+  email: string
+  phone: string
+  location: string
+  role: string
+  status: string
+  profileImage?: string
+  stripeCustomerId?: string | null
+  createdAt: string
+  updatedAt: string
+}
 const ITEMS_PER_PAGE = 6
 const TechnicianGrid = () => {
   const [technicians, setTechnicians] = useState<Technician[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [totalItems, setTotalItems] = useState(0)
+  const [user, setUser] = useState<User | null>(null)
   const searchParams = useSearchParams()
   const [filters, setFilters] = useState<Filters>({
     location: "All",
@@ -93,19 +110,20 @@ const TechnicianGrid = () => {
     page: currentPage,
     limit: ITEMS_PER_PAGE,
   })
-
   const searchTerms = searchParams.get("searchTerms") ?? undefined
 
   useEffect(() => {
     const fetchTechnicians = async () => {
       try {
+        const userData = await getMe()
+        setUser(userData.data)
         const loadTechnicians = await getTechnicians({
           ...filters,
           page: currentPage,
           limit: ITEMS_PER_PAGE,
           searchTerms: searchTerms,
         })
-        console.log(loadTechnicians)
+
         setTechnicians(loadTechnicians.data.result)
         setTotalItems(loadTechnicians.data.totalTechnicians)
       } catch (err) {
@@ -452,17 +470,18 @@ const TechnicianGrid = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-2 pt-2">
-                  <Button variant="outline" className="flex-1" size="sm">
-                    View Profile
-                  </Button>
-                  <Button
-                    className="flex-1"
-                    size="sm"
-                    disabled={!technician.isAvailable}
-                  >
-                    {technician.isAvailable ? "Book Now" : "Unavailable"}
-                  </Button>
+                <div className="flex w-full gap-2 pt-2">
+                  <Link href={`/technicians/offered-services/${user?.id}`}>
+                    <Button
+                      className="flex-1"
+                      size="sm"
+                      disabled={!technician.isAvailable}
+                    >
+                      {technician.isAvailable
+                        ? "Browse Services offered by this Technician"
+                        : "Unavailable"}
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>

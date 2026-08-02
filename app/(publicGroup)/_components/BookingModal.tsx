@@ -53,6 +53,7 @@ interface BookingModalProps {
     technicianProfileId: string
   }
   onSubmit?: (bookingData: BookingFormData) => void
+  buttonDisabled?: boolean
 }
 
 export interface BookingFormData {
@@ -166,6 +167,10 @@ export function BookingModal({
       if (response.success) {
         toast.success("Booking request submitted Successfully!")
         router.push("/")
+      }
+
+      if (response.success === false) {
+        toast.error(response.message || "Booking request failed.")
       }
 
       // Close modal after successful submission
@@ -423,7 +428,7 @@ export function BookingModal({
               </Button>
               <Button
                 type="submit"
-                disabled={isSubmitting || !selectedSlotId}
+                disabled={isSubmitting}
                 className="h-9 flex-1 bg-primary text-xs hover:bg-primary/90 sm:h-10 sm:text-sm"
               >
                 {isSubmitting ? "Processing..." : "Confirm Booking"}

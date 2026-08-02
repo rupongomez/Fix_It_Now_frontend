@@ -256,7 +256,7 @@ export default function TechnicianServicesPage() {
                   </div>
                 </div>
 
-                <Link href={`/services/${service.id}`}>
+                <Link href={`/services/details/${service.id}`}>
                   <Button
                     className="mt-auto w-full"
 

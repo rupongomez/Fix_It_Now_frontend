@@ -25,6 +25,8 @@ import {
 import { toast } from "sonner"
 import { getServiceDetails } from "@/app/(publicGroup)/_actions/serviceDetailsAction"
 import { BookingModal } from "@/app/(publicGroup)/_components/BookingModal"
+import { getLoggedInCustomersBooking } from "@/app/(publicGroup)/_actions/getLoggedinCustomersBooking"
+import { int } from "zod"
 
 interface ServiceData {
   id: string
@@ -46,11 +48,41 @@ interface ServiceResponse {
   data: ServiceData
 }
 
+/*
+{
+    "success": true,
+    "statusCode": 200,
+    "message": "All bookings for logged in customer retrieved",
+    "data": [
+        {
+            "id": "5248ed8a-616c-46ab-87cb-5ffbe1f0c267",
+            "customerId": "fb6eaeab-b3b0-4c80-ab6f-df21f1e6de57",
+            "technicianId": "ceb03d58-cc6f-4a29-a1ac-d7301e5e5839",
+            "serviceId": "2dd1c064-06be-41ba-ab1f-544b8992a1c6",
+            "availabilitySlotId": "a52aac63-0bce-4795-b425-31653795ed5c",
+            "bookingTime": "2026-07-10T10:30:00.000Z",
+            "customerAddress": "221B Baker Street, London",
+            "note": "Please arrive 10 minutes early",
+            "totalPrice": "200",
+            "status": "COMPLETED",
+            "createdAt": "2026-07-11T20:19:24.234Z",
+            "updatedAt": "2026-07-11T20:19:24.234Z"
+        }
+    ]
+}
+*/
+
+interface BookingData {
+  id: string
+  customerId: string
+}
+
 export default function ServiceDetailsPage() {
   const [service, setService] = useState<ServiceData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isBooking, setIsBooking] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
+  const [buttonDisabled, setButtonDisabled] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const params = useParams()
   const router = useRouter()
@@ -61,7 +93,7 @@ export default function ServiceDetailsPage() {
         setIsLoading(true)
         setError(null)
         const response = await getServiceDetails(params.id as string)
-
+        console.log(response)
         if (response.success && response.data) {
           console.log(response.data.technicianProfileId)
           setService(response.data)
@@ -82,6 +114,18 @@ export default function ServiceDetailsPage() {
       fetchService()
     }
   }, [params.id])
+
+  useEffect(() => {
+    const fetchCustomersBookings = async () => {
+      const bookings = await getLoggedInCustomersBooking()
+      if (bookings.success) {
+        if (bookings.data.technicianId === service?.technicianProfileId) {
+          setButtonDisabled(true)
+        }
+      }
+    }
+    fetchCustomersBookings()
+  }, [service?.technicianProfileId, service?.id])
 
   const handleShare = async () => {
     try {
@@ -387,7 +431,7 @@ export default function ServiceDetailsPage() {
                   size="lg"
                   className="w-full bg-white font-semibold text-primary hover:bg-white/90"
                   onClick={() => setModalOpen(true)}
-                  disabled={isBooking || !service}
+                  disabled={isBooking || !service || buttonDisabled}
                 >
                   {isBooking ? (
                     <>
