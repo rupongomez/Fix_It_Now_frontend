@@ -24,3 +24,15 @@ export const checkoutService = async (serviceId: string) => {
   console.log(result)
   return result
 }
+
+export const getPaymentHistoryForCustomer = async () => {
+  const cookieStore = await cookies()
+  const accessToken = cookieStore.get("accessToken")
+
+  const res = await fetch(`${process.env.BACKEND_API_URL}/api/booking`, {
+    headers: {
+      Authorization: `${accessToken?.value}`,
+    },
+  })
+  return res.json()
+}

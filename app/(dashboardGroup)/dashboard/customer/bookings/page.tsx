@@ -21,7 +21,12 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { getLoggedInCustomersBookings } from "../_actions/customerBookingActions"
-import { checkoutService } from "@/app/(publicGroup)/_actions/checkoutAction"
+import {
+  checkoutService,
+  getPaymentHistoryForCustomer,
+} from "@/app/(publicGroup)/_actions/checkoutAction"
+import { useRouter } from "next/navigation"
+import { IPayment } from "@/lib/types/paymentHistory"
 // import { initiatePayment } from "../../_actions/paymentActions"
 
 interface Booking {
@@ -102,19 +107,23 @@ export default function CustomerBookingPageComponent() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
+  const [payment, setPayment] = useState<IPayment | null>(null)
   const [processingBookingId, setProcessingBookingId] = useState<string | null>(
     null
   )
-
+  const router = useRouter()
   useEffect(() => {
     const fetchBookings = async () => {
       try {
         setIsLoading(true)
         const response = await getLoggedInCustomersBookings()
-        console.log("Customer bookings:", response)
 
         if (response.success && response.data) {
           setBookings(response.data)
+          const paymentHistory = await getPaymentHistoryForCustomer()
+          if (paymentHistory.success) {
+            setPayment(paymentHistory)
+          }
         } else {
           toast.error(response.message || "Failed to fetch bookings")
         }
@@ -138,7 +147,7 @@ export default function CustomerBookingPageComponent() {
 
       if (response.success && response.data?.paymentUrl) {
         // Redirect to payment gateway
-        window.location.href = response.data.paymentUrl
+        router.push(response.data.paymentUrl)
       } else {
         toast.error(response.message || "Failed to initiate payment")
       }
@@ -152,7 +161,7 @@ export default function CustomerBookingPageComponent() {
 
   const handleLeaveReview = (bookingId: string) => {
     // Redirect to review page
-    window.location.href = `/review/${bookingId}`
+    router.push(`/review/${bookingId}`)
   }
 
   const filteredBookings = selectedStatus
@@ -381,7 +390,10 @@ export default function CustomerBookingPageComponent() {
                             variant="default"
                             className="w-full bg-green-600 hover:bg-green-700"
                             onClick={() => handlePayNow(booking.id)}
-                            disabled={isProcessing(booking.id)}
+                            disabled={
+                              isProcessing(booking.id) &&
+                              payment?.data.bookingId === booking.id
+                            }
                           >
                             {isProcessing(booking.id) ? (
                               <>

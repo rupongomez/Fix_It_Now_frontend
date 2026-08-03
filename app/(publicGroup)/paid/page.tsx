@@ -123,13 +123,12 @@ export default function PaymentStatusPage() {
 
             {/* Buttons */}
             <div className="mt-6 flex w-full flex-col gap-2 sm:mt-8 sm:gap-3">
-              <Button
-                className="w-full text-sm sm:text-base"
-                onClick={() => router.back()}
-              >
-                <ArrowRight className="mr-2 size-4" />
-                Try Again
-              </Button>
+              <Link href="/dashboard/customer/bookings" className="w-full">
+                <Button className="w-full text-sm sm:text-base">
+                  <ArrowRight className="mr-2 size-4" />
+                  Go Back to Bookings
+                </Button>
+              </Link>
               <Link href="/dashboard/customer" className="w-full">
                 <Button
                   variant="outline"
