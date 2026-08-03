@@ -19,10 +19,15 @@ import {
   Briefcase,
   MessageSquare,
   Share2,
+  Pencil,
 } from "lucide-react"
 import { useParams } from "next/navigation"
-import { getTechnicianProfileById } from "@/app/(dashboardGroup)/_actions/getTechnicianProfileAction"
+import {
+  getTechnicianProfileById,
+  updateTechnicianProfile,
+} from "@/app/(dashboardGroup)/_actions/technicianProfileAction"
 import { TechnicianProfileSkeleton } from "./TechnicianPrfileLoadingSkeleton"
+import { EditProfileModal } from "./EditTechnicianModal"
 
 interface IReview {
   id: string
@@ -48,6 +53,7 @@ interface TechnicianProfile {
     completedJobs: number
     location: string
     isAvailable: boolean
+    skills?: string[]
     createdAt: string
     updatedAt: string
     reviews: IReview[]
@@ -59,6 +65,7 @@ const TechnicianProfile = () => {
     useState<TechnicianProfile | null>(null)
   const [isFollowing, setIsFollowing] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
 
   const params = useParams()
 
@@ -82,6 +89,24 @@ const TechnicianProfile = () => {
   }, [params.id])
 
   const technician = technicianData?.data
+
+  const handleUpdateProfile = async (data: {
+    bio: string
+    experience: number
+    hourlyRate: number
+    service: string[]
+    location: string
+  }) => {
+    const response = await updateTechnicianProfile(data)
+    if (response.success) {
+      // Refresh the profile data
+      const updatedProfile = await getTechnicianProfileById(params.id as string)
+      if (updatedProfile.success && updatedProfile.data) {
+        setTechnicianData(updatedProfile)
+      }
+    }
+    return response
+  }
 
   if (loading || !technician) {
     return <TechnicianProfileSkeleton />
@@ -113,6 +138,11 @@ const TechnicianProfile = () => {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {/* ✅ Edit Profile Button */}
+          <Button variant="default" onClick={() => setEditModalOpen(true)}>
+            <Pencil className="mr-2 size-4" />
+            Edit Profile
+          </Button>
           <Button
             variant={isFollowing ? "default" : "outline"}
             onClick={() => setIsFollowing(!isFollowing)}
@@ -210,6 +240,24 @@ const TechnicianProfile = () => {
                   </p>
                 </div>
               </div>
+              {/* ✅ Skills Display */}
+              {technician.skills && technician.skills.length > 0 && (
+                <>
+                  <Separator />
+                  <div>
+                    <h3 className="mb-2 font-semibold text-foreground">
+                      Skills
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {technician.skills.map((skill) => (
+                        <Badge key={skill} variant="secondary">
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -356,6 +404,21 @@ const TechnicianProfile = () => {
           </Card>
         </div>
       </div>
+
+      {/* ✅ Edit Profile Modal */}
+      <EditProfileModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        technician={{
+          id: technician.id,
+          bio: technician.bio,
+          experience: technician.experience,
+          hourlyRate: technician.hourlyRate,
+          location: technician.location,
+          skills: technician.skills || [],
+        }}
+        onSave={handleUpdateProfile}
+      />
     </div>
   )
 }

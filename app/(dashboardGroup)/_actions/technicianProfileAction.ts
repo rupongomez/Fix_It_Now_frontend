@@ -40,3 +40,40 @@ export const getTechnicianProfileById = async (id: string) => {
   console.log(result)
   return result
 }
+
+interface TechnicianProfileData {
+  bio: string
+  experience: number
+  hourlyRate: number
+  service: string[]
+  location: string
+}
+
+export const updateTechnicianProfile = async (
+  profileData: TechnicianProfileData
+) => {
+  const cookieStore = await cookies()
+  const accessToken = cookieStore.get("accessToken")?.value
+  if (!accessToken) {
+    return {
+      success: false,
+      message: "User not logged in",
+    }
+  }
+
+  const res = await fetch(
+    `${process.env.BACKEND_API_URL}/api/technician/update-profile`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `${accessToken}`,
+      },
+      body: JSON.stringify(profileData),
+    }
+  )
+  const result = await res.json()
+
+  console.log(result)
+  return result
+}

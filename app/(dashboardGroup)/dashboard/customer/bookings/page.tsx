@@ -28,7 +28,19 @@ import {
 import { useRouter } from "next/navigation"
 import { IPayment } from "@/lib/types/paymentHistory"
 import Link from "next/link"
-// import { initiatePayment } from "../../_actions/paymentActions"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { cancelBooking } from "@/app/(dashboardGroup)/_actions/cancelBooking"
+import { ReviewModal } from "@/app/(dashboardGroup)/_components/ReviewModal"
+import { submitReview } from "@/app/(dashboardGroup)/_actions/reviewActions"
 
 interface Booking {
   id: string
@@ -113,6 +125,18 @@ export default function CustomerBookingPageComponent() {
     null
   )
   const router = useRouter()
+
+  // AlertDialog state
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
+  const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null)
+
+  // ✅ Review Modal state - Use technicianProfileId
+  const [reviewModalOpen, setReviewModalOpen] = useState(false)
+  const [bookingToReview, setBookingToReview] = useState<{
+    id: string
+    technicianProfileId: string
+  } | null>(null)
+
   useEffect(() => {
     const fetchBookings = async () => {
       try {
@@ -139,6 +163,77 @@ export default function CustomerBookingPageComponent() {
     fetchBookings()
   }, [])
 
+  // Open cancel confirmation dialog
+  const openCancelDialog = (booking: Booking) => {
+    setBookingToCancel(booking)
+    setCancelDialogOpen(true)
+  }
+
+  // Handle actual cancellation
+  const confirmCancelBooking = async () => {
+    if (!bookingToCancel) return
+
+    setProcessingBookingId(bookingToCancel.id)
+
+    // Optimistic update
+    setBookings((prev) =>
+      prev.map((booking) =>
+        booking.id === bookingToCancel.id
+          ? { ...booking, status: "CANCELLED" as Booking["status"] }
+          : booking
+      )
+    )
+
+    try {
+      const response = await cancelBooking(bookingToCancel.id)
+      console.log(response)
+      if (!response.success) {
+        throw new Error(response.message || "Failed to cancel booking")
+      }
+
+      toast.success("Booking cancelled successfully")
+      setCancelDialogOpen(false)
+      setBookingToCancel(null)
+    } catch (error) {
+      // Revert on error
+      setBookings((prev) =>
+        prev.map((booking) =>
+          booking.id === bookingToCancel.id
+            ? { ...booking, status: "REQUESTED" as Booking["status"] }
+            : booking
+        )
+      )
+      toast.error(
+        error instanceof Error ? error.message : "Failed to cancel booking"
+      )
+      console.error(error)
+    } finally {
+      setProcessingBookingId(null)
+    }
+  }
+
+  // ✅ Open review modal - Map technicianId to technicianProfileId
+  const openReviewModal = (booking: Booking) => {
+    setBookingToReview({
+      id: booking.id,
+      technicianProfileId: booking.technicianId, // ✅ Map to technicianProfileId
+    })
+    setReviewModalOpen(true)
+  }
+
+  // ✅ Handle review submission - Send technicianProfileId
+  const handleSubmitReview = async (data: {
+    bookingId: string
+    technicianProfileId: string
+    rating: number
+    comment: string
+  }) => {
+    const response = await submitReview(data)
+    if (!response.success) {
+      throw new Error(response.message || "Failed to submit review")
+    }
+  }
+
   const handlePayNow = async (bookingId: string) => {
     setProcessingBookingId(bookingId)
 
@@ -147,7 +242,6 @@ export default function CustomerBookingPageComponent() {
       console.log("Payment response:", response)
 
       if (response.success && response.data?.paymentUrl) {
-        // Redirect to payment gateway
         router.push(response.data.paymentUrl)
       } else {
         toast.error(response.message || "Failed to initiate payment")
@@ -158,11 +252,6 @@ export default function CustomerBookingPageComponent() {
     } finally {
       setProcessingBookingId(null)
     }
-  }
-
-  const handleLeaveReview = (bookingId: string) => {
-    // Redirect to review page
-    router.push(`/review/${bookingId}`)
   }
 
   const filteredBookings = selectedStatus
@@ -187,6 +276,10 @@ export default function CustomerBookingPageComponent() {
     IN_PROGRESS: bookings.filter((b) => b.status === "IN_PROGRESS").length,
     COMPLETED: bookings.filter((b) => b.status === "COMPLETED").length,
     CANCELLED: bookings.filter((b) => b.status === "CANCELLED").length,
+  }
+
+  const canCancel = (status: string) => {
+    return status === "REQUESTED" || status === "ACCEPTED"
   }
 
   const canPay = (status: string) => {
@@ -270,7 +363,6 @@ export default function CustomerBookingPageComponent() {
                     <div className="grid gap-6 md:grid-cols-[1fr_auto]">
                       {/* Left Section - Main Info */}
                       <div className="space-y-4">
-                        {/* Header with Status */}
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1">
                             <h3 className="text-lg font-semibold text-foreground">
@@ -292,7 +384,6 @@ export default function CustomerBookingPageComponent() {
                           </Badge>
                         </div>
 
-                        {/* Booking Details Grid */}
                         <div className="grid gap-3 sm:grid-cols-2">
                           <div className="flex items-start gap-3">
                             <Calendar className="mt-1 size-4 shrink-0 text-primary" />
@@ -345,7 +436,6 @@ export default function CustomerBookingPageComponent() {
                           </div>
                         </div>
 
-                        {/* Notes */}
                         {booking.note && (
                           <>
                             <Separator className="my-2" />
@@ -364,54 +454,72 @@ export default function CustomerBookingPageComponent() {
                         )}
                       </div>
 
-                      {/* ✅ Right Section - Customer Actions */}
+                      {/* Right Section - Customer Actions */}
                       <div className="flex flex-col gap-2 md:w-40">
-                        {/* REQUESTED - Customer just waits */}
+                        {/* REQUESTED - Customer can Cancel */}
                         {booking.status === "REQUESTED" && (
                           <>
                             <Button
                               size="sm"
                               variant="outline"
-                              className="w-full"
-                              disabled
+                              className="w-full border-yellow-600 text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700 dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-950"
+                              onClick={() => openCancelDialog(booking)}
+                              disabled={isProcessing(booking.id)}
                             >
-                              <Clock className="mr-2 size-4" />
-                              Awaiting Response
+                              {isProcessing(booking.id) ? (
+                                <>
+                                  <Loader2 className="mr-2 size-4 animate-spin" />
+                                  Processing...
+                                </>
+                              ) : (
+                                "Cancel Request"
+                              )}
                             </Button>
                             <p className="text-center text-xs text-muted-foreground">
-                              Technician will respond shortly
+                              Awaiting technician response
                             </p>
                           </>
                         )}
 
-                        {/* ✅ ACCEPTED - Customer can Pay */}
+                        {/* ACCEPTED - Customer can Pay or Cancel */}
                         {booking.status === "ACCEPTED" && (
-                          <Button
-                            size="sm"
-                            variant="default"
-                            className="w-full bg-green-600 hover:bg-green-700"
-
-                            disabled={
-                              isProcessing(booking.id) &&
-                              payment?.data.bookingId === booking.id
-                            }
-                          >
-                            {isProcessing(booking.id) ? (
-                              <>
-                                <Loader2 className="mr-2 size-4 animate-spin" />
-                                Processing...
-                              </>
-                            ) : (
-                              <>
-                                <CreditCard className="mr-2 size-4" />
-                                <Link
-                                  href={`/services/check-out/${booking.id}`}
-                                >
-                                  Checkout now
-                                </Link>
-                              </>
-                            )}
-                          </Button>
+                          <>
+                            <Button
+                              size="sm"
+                              variant="default"
+                              className="w-full bg-green-600 hover:bg-green-700"
+                              onClick={() => handlePayNow(booking.id)}
+                              disabled={isProcessing(booking.id)}
+                            >
+                              {isProcessing(booking.id) ? (
+                                <>
+                                  <Loader2 className="mr-2 size-4 animate-spin" />
+                                  Processing...
+                                </>
+                              ) : (
+                                <>
+                                  <CreditCard className="mr-2 size-4" />
+                                  Pay Now
+                                </>
+                              )}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="w-full border-rose-600 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:border-rose-500 dark:text-rose-400 dark:hover:bg-rose-950"
+                              onClick={() => openCancelDialog(booking)}
+                              disabled={isProcessing(booking.id)}
+                            >
+                              {isProcessing(booking.id) ? (
+                                <>
+                                  <Loader2 className="mr-2 size-4 animate-spin" />
+                                  Processing...
+                                </>
+                              ) : (
+                                "Cancel Booking"
+                              )}
+                            </Button>
+                          </>
                         )}
 
                         {/* DECLINED - Disabled */}
@@ -457,13 +565,13 @@ export default function CustomerBookingPageComponent() {
                           </Button>
                         )}
 
-                        {/* ✅ COMPLETED - Customer can Review */}
+                        {/* COMPLETED - Customer can Review */}
                         {booking.status === "COMPLETED" && (
                           <Button
                             size="sm"
                             variant="default"
                             className="w-full"
-                            onClick={() => handleLeaveReview(booking.id)}
+                            onClick={() => openReviewModal(booking)}
                           >
                             <MessageSquare className="mr-2 size-4" />
                             Leave Review
@@ -513,6 +621,53 @@ export default function CustomerBookingPageComponent() {
           </Card>
         )}
       </div>
+
+      {/* AlertDialog for Cancel Confirmation */}
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Booking</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this booking?
+              {bookingToCancel && (
+                <span className="mt-2 block text-sm font-medium text-foreground">
+                  Booking ID: {bookingToCancel.id.slice(0, 8)}...
+                </span>
+              )}
+              <span className="mt-2 block text-rose-500 dark:text-rose-400">
+                This action cannot be undone.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!processingBookingId}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmCancelBooking}
+              disabled={!!processingBookingId}
+              className="bg-rose-600 hover:bg-rose-700"
+            >
+              {processingBookingId ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Yes, Cancel Booking"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Review Modal */}
+      <ReviewModal
+        open={reviewModalOpen}
+        onOpenChange={setReviewModalOpen}
+        booking={bookingToReview}
+        onSubmitReview={handleSubmitReview}
+      />
     </div>
   )
 }

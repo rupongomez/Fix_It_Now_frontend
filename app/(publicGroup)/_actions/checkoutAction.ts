@@ -36,3 +36,17 @@ export const getPaymentHistoryForCustomer = async () => {
   })
   return res.json()
 }
+
+export const getAllPaymentHistoryForCustomer = async () => {
+  const cookieStore = await cookies()
+  const accessToken = cookieStore.get("accessToken")
+  const res = await fetch(
+    `${process.env.BACKEND_API_URL}/api/payments/history`,
+    {
+      headers: {
+        Authorization: `${accessToken?.value}`,
+      },
+    }
+  )
+  return res.json()
+}

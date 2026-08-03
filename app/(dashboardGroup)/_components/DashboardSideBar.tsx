@@ -24,6 +24,7 @@ import {
   Users,
   LayoutDashboard,
   UserCog,
+  Package,
 } from "lucide-react"
 import { useState } from "react"
 import Image from "next/image"
@@ -55,13 +56,25 @@ export function DashBoardSidebar({ user }: IDashBoardSidebarProps) {
     {
       title: "My Profile",
       icon: User,
-      href: "/profile",
+      href: "/dashboard/profile",
       show: true,
     },
     {
       title: "Technician Profile",
       icon: UserCog,
       href: `/dashboard/technician/profile/${user.data.id}`,
+      show: userRole === "TECHNICIAN",
+    },
+    {
+      title: "Payment History",
+      icon: BarChart3,
+      href: "/dashboard/customer/payment-history",
+      show: userRole === "CUSTOMER",
+    },
+    {
+      title: "Availability",
+      icon: Calendar,
+      href: "/dashboard/technician/availability",
       show: userRole === "TECHNICIAN",
     },
     {
@@ -84,7 +97,16 @@ export function DashBoardSidebar({ user }: IDashBoardSidebarProps) {
           : userRole === "TECHNICIAN"
             ? `/dashboard/technician/bookings/${user.data.id}`
             : "/dashboard/customer/bookings",
-      show: true,
+      show: userRole !== "ADMIN",
+    },
+    {
+      title: "Category",
+      icon: Package,
+      href:
+        userRole === "ADMIN"
+          ? "/dashboard/admin/categories"
+          : "/dashboard/customer/",
+      show: userRole === "ADMIN",
     },
   ]
 

@@ -38,7 +38,7 @@ export function Navbar({ user }: { user?: IUser }) {
 
   const handleUserMenuAction = async (action: string) => {
     if (action === "profile") {
-      router.push("/profile")
+      router.push("/dashboard/profile")
     } else if (action === "settings") {
       router.push("/settings")
     } else if (action === "dashboard") {
