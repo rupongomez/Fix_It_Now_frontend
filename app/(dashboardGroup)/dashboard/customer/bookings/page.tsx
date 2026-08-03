@@ -27,6 +27,7 @@ import {
 } from "@/app/(publicGroup)/_actions/checkoutAction"
 import { useRouter } from "next/navigation"
 import { IPayment } from "@/lib/types/paymentHistory"
+import Link from "next/link"
 // import { initiatePayment } from "../../_actions/paymentActions"
 
 interface Booking {
@@ -389,7 +390,7 @@ export default function CustomerBookingPageComponent() {
                             size="sm"
                             variant="default"
                             className="w-full bg-green-600 hover:bg-green-700"
-                            onClick={() => handlePayNow(booking.id)}
+
                             disabled={
                               isProcessing(booking.id) &&
                               payment?.data.bookingId === booking.id
@@ -403,7 +404,11 @@ export default function CustomerBookingPageComponent() {
                             ) : (
                               <>
                                 <CreditCard className="mr-2 size-4" />
-                                Pay Now
+                                <Link
+                                  href={`/services/check-out/${booking.id}`}
+                                >
+                                  Checkout now
+                                </Link>
                               </>
                             )}
                           </Button>

@@ -166,7 +166,7 @@ export function BookingModal({
 
       if (response.success) {
         toast.success("Booking request submitted Successfully!")
-        router.push("/")
+        router.push("/dashboard/customer/bookings")
       }
 
       if (response.success === false) {

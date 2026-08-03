@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
+import Link from "next/link"
 import {
   Card,
   CardContent,
@@ -12,6 +13,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Separator } from "@/components/ui/separator"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DollarSign,
   Clock,
@@ -20,15 +23,19 @@ import {
   Calendar,
   Star,
   Briefcase,
+  User,
+  Phone,
+  Mail,
+  CheckCircle2,
+  XCircle,
+  Wrench,
 } from "lucide-react"
 import { toast } from "sonner"
-
 import { getMe } from "@/service/getMe"
 import { IUser } from "@/lib/types/UserTypes"
 import { IService } from "@/lib/types/ServiceTypes"
 import { getServicesOfferedByThisTechnician } from "@/app/(publicGroup)/_actions/serverActions"
 import { checkoutService } from "@/app/(publicGroup)/_actions/checkoutAction"
-import Link from "next/link"
 
 export default function TechnicianServicesPage() {
   const [services, setServices] = useState<IService[]>([])
@@ -71,37 +78,41 @@ export default function TechnicianServicesPage() {
     })
   }
 
-  const handleBookService = async (serviceId: string) => {
-    try {
-      const makePayment = await checkoutService(serviceId)
-      console.log(makePayment)
-    } catch (error) {
-      console.log(error)
-    }
+  const renderStars = (rating: number) => {
+    return [...Array(5)].map((_, i) => (
+      <Star
+        key={i}
+        className={`size-4 ${
+          i < Math.round(rating)
+            ? "fill-yellow-400 text-yellow-400"
+            : "text-muted-foreground"
+        }`}
+      />
+    ))
   }
-  console.log(services)
+
   // Loading state
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div>
-          <Skeleton className="h-10 w-64" />
-          <Skeleton className="mt-2 h-5 w-96" />
-        </div>
-
+        {/* Profile Skeleton */}
         <Card>
           <CardContent className="pt-6">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i}>
-                  <Skeleton className="h-4 w-20" />
-                  <Skeleton className="mt-1 h-6 w-32" />
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+              <Skeleton className="size-24 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-8 w-48" />
+                <Skeleton className="h-4 w-32" />
+                <div className="flex gap-4">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-24" />
                 </div>
-              ))}
+              </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Services Grid Skeleton */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, i) => (
             <Card key={i}>
@@ -142,144 +153,215 @@ export default function TechnicianServicesPage() {
   }
 
   const technician = services[0]?.technicianProfile
+  const technicianName = user?.data?.name || "Technician"
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-4xl font-bold text-foreground">
-          {technician
-            ? `Services by ${user?.data?.name || "Technician"}`
-            : "Services"}
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Browse and book services from this technician
-        </p>
-      </div>
+    <div className="mx-auto w-11/12 space-y-8">
+      {/* ✅ Technician Profile Card */}
+      <Card className="overflow-hidden border-0 shadow-lg">
+        <div className="h-32 bg-linear-to-r from-primary/20 to-primary/10" />
+        <CardContent className="relative -mt-16">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
+            {/* Avatar */}
+            <Avatar className="size-28 border-4 border-background shadow-lg">
+              <AvatarImage
+                src={
+                  user?.data?.profileImage || "https://i.pravatar.cc/300?img=5"
+                }
+                alt={technicianName}
+              />
+              <AvatarFallback className="text-2xl">
+                {technicianName.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
 
-      {/* Technician Info Card */}
-      {technician && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {/* Info */}
+            <div className="flex flex-1 flex-wrap items-start justify-between gap-4 pb-2">
               <div>
-                <p className="text-sm text-muted-foreground">Location</p>
-                <p className="flex items-center gap-1 font-medium">
-                  <MapPin className="size-4 text-muted-foreground" />
-                  {technician.location}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Hourly Rate</p>
-                <p className="flex items-center gap-1 font-medium">
-                  <DollarSign className="size-4 text-muted-foreground" />৳
-                  {technician.hourlyRate}/hr
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Experience</p>
-                <p className="flex items-center gap-1 font-medium">
-                  <Briefcase className="size-4 text-muted-foreground" />
-                  {technician.experience} years
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Rating</p>
-                <p className="flex items-center gap-1 font-medium">
-                  <Star className="size-4 fill-yellow-400 text-yellow-400" />
-                  {technician.averageRating > 0
-                    ? technician.averageRating.toFixed(1)
-                    : "No reviews"}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Status</p>
-                <Badge
-                  className={
-                    technician.isAvailable
-                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                      : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                  }
-                >
-                  {technician.isAvailable ? "Available" : "Unavailable"}
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Services Grid */}
-      {services.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {services.map((service) => (
-            <Card key={service.id} className="flex flex-col">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-xl">{service.title}</CardTitle>
-                    <CardDescription className="mt-1 line-clamp-2">
-                      {service.description}
-                    </CardDescription>
+                <h1 className="text-2xl font-bold text-foreground">
+                  {technicianName}
+                </h1>
+                <div className="mt-1 flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-1">
+                    {renderStars(technician?.averageRating || 0)}
+                    <span className="text-sm font-medium">
+                      {technician?.averageRating?.toFixed(1) || "0"}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      ({technician?.completedJobs || 0} reviews)
+                    </span>
                   </div>
-                  <Badge variant="outline" className="shrink-0">
-                    {service.duration}h
+                  <Separator orientation="vertical" className="h-4" />
+                  <Badge
+                    className={
+                      technician?.isAvailable
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                    }
+                  >
+                    {technician?.isAvailable ? (
+                      <>
+                        <CheckCircle2 className="mr-1 size-3" />
+                        Available
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="mr-1 size-3" />
+                        Unavailable
+                      </>
+                    )}
                   </Badge>
                 </div>
-              </CardHeader>
-              <CardContent className="flex flex-1 flex-col gap-4">
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="size-4 text-primary" />
-                    <span className="text-2xl font-bold text-foreground">
-                      ৳{parseFloat(service.price).toFixed(2)}
-                    </span>
-                    <span className="text-muted-foreground">/ service</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="size-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">
-                      {service.location}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="size-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">
-                      {service.duration} hour{service.duration > 1 ? "s" : ""}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="size-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">
-                      Added {formatDate(service.createdAt)}
-                    </span>
-                  </div>
+              </div>
+
+              {/* Stats */}
+              <div className="flex flex-wrap gap-4">
+                <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-1.5">
+                  <Briefcase className="size-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">
+                    {technician?.experience || 0} years
+                  </span>
                 </div>
+                <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-1.5">
+                  <MapPin className="size-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">
+                    {technician?.location || "N/A"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-1.5">
+                  <DollarSign className="size-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">
+                    ৳{technician?.hourlyRate || 0}/hr
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                <Link href={`/services/details/${service.id}`}>
-                  <Button
-                    className="mt-auto w-full"
+          {/* Bio */}
+          {technician?.bio && (
+            <div className="mt-4 rounded-lg bg-muted/30 p-4">
+              <p className="text-sm text-muted-foreground">{technician.bio}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-                    disabled={!technician?.isAvailable}
-                  >
-                    {technician?.isAvailable ? "Book Now" : "Unavailable"}
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <Package className="mb-4 size-12 text-muted-foreground" />
-            <h3 className="text-lg font-semibold">No services available</h3>
+      {/* ✅ Services Section */}
+      <div>
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">
+              Offered Services
+            </h2>
             <p className="text-sm text-muted-foreground">
-              This technician hasn&apos;t added any services yet
+              {services.length} service{services.length !== 1 ? "s" : ""}{" "}
+              available
             </p>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </div>
+
+        {services.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {services.map((service) => (
+              <Card
+                key={service.id}
+                className="group flex flex-col transition-all duration-300 hover:border-primary/20 hover:shadow-lg"
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <CardTitle className="line-clamp-1 text-xl">
+                        {service.title}
+                      </CardTitle>
+                      <CardDescription className="mt-1 line-clamp-2 text-sm">
+                        {service.description}
+                      </CardDescription>
+                    </div>
+                    <Badge variant="outline" className="shrink-0">
+                      {service.duration}h
+                    </Badge>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="flex flex-1 flex-col gap-4">
+                  {/* Details */}
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="size-4 text-primary" />
+                        <span className="text-2xl font-bold text-foreground">
+                          ৳{parseFloat(service.price).toFixed(2)}
+                        </span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        / service
+                      </span>
+                    </div>
+
+                    <Separator />
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="size-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">
+                        {service.location}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <Clock className="size-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">
+                        {service.duration} hour{service.duration > 1 ? "s" : ""}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <Calendar className="size-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">
+                        Added {formatDate(service.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Book Button */}
+                  <Link
+                    href={`/services/details/${service.id}`}
+                    className="mt-auto"
+                  >
+                    <Button
+                      className="w-full transition-all group-hover:bg-primary/90"
+                      disabled={!technician?.isAvailable}
+                    >
+                      {technician?.isAvailable ? (
+                        <>
+                          <Wrench className="mr-2 size-4" />
+                          Book Now
+                        </>
+                      ) : (
+                        "Unavailable"
+                      )}
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="rounded-full bg-muted p-4">
+                <Package className="size-10 text-muted-foreground" />
+              </div>
+              <h3 className="mt-4 text-xl font-semibold text-foreground">
+                No services available
+              </h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                This technician hasn&apos;t added any services yet
+              </p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   )
 }

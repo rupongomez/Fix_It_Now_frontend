@@ -124,6 +124,7 @@ const TechnicianGrid = () => {
           searchTerms: searchTerms,
         })
 
+        console.log(loadTechnicians.data.result)
         setTechnicians(loadTechnicians.data.result)
         setTotalItems(loadTechnicians.data.totalTechnicians)
       } catch (err) {
@@ -471,7 +472,9 @@ const TechnicianGrid = () => {
 
                 {/* Action Buttons */}
                 <div className="flex w-full gap-2 pt-2">
-                  <Link href={`/technicians/offered-services/${user?.id}`}>
+                  <Link
+                    href={`/technicians/offered-services/${technician.userId}`}
+                  >
                     <Button
                       className="flex-1"
                       size="sm"
