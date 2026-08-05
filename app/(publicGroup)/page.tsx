@@ -2,7 +2,15 @@ import Link from "next/link"
 import { Star, MapPin, DollarSign, ArrowRight, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { getServices, getTechnicians } from "./_actions/serverActions"
 
 export const metadata = {
   title: "FixItNow - Your Trusted Home Service Platform",
@@ -10,95 +18,96 @@ export const metadata = {
     "Find and book trusted professionals for all your home service needs",
 }
 
-const featuredServices = [
-  {
-    id: 1,
-    name: "Plumbing",
-    description: "Repairs, installations, and maintenance",
-    icon: "🔧",
-    color: "from-blue-500 to-blue-600",
-  },
-  {
-    id: 2,
-    name: "Electrical",
-    description: "Wiring, repairs, and upgrades",
-    icon: "⚡",
-    color: "from-yellow-500 to-yellow-600",
-  },
-  {
-    id: 3,
-    name: "HVAC",
-    description: "Heating, cooling, and ventilation",
-    icon: "❄️",
-    color: "from-cyan-500 to-cyan-600",
-  },
-  {
-    id: 4,
-    name: "Cleaning",
-    description: "Deep cleaning and maintenance",
-    icon: "🧹",
-    color: "from-green-500 to-green-600",
-  },
-  {
-    id: 5,
-    name: "Carpentry",
-    description: "Repairs, building, and finishing",
-    icon: "🪵",
-    color: "from-orange-500 to-orange-600",
-  },
-  {
-    id: 6,
-    name: "Painting",
-    description: "Interior and exterior painting",
-    icon: "🎨",
-    color: "from-purple-500 to-purple-600",
-  },
-]
+interface IService {
+  id: string
+  technicianProfileId: string
+  categoryId: string
+  title: string
+  description: string
+  price: string
+  duration: number
+  location: string
+  createdAt: string
+  updatedAt: string
+  technicianProfile: {
+    id: string
+    userId: string
+    bio: string
+    experience: number
+    hourlyRate: string
+    averageRating: number
+    completedJobs: number
+    location: string
+    isAvailable: boolean
+    createdAt: string
+    updatedAt: string
+  }
+}
 
-const topTechnicians = [
-  {
-    id: 1,
-    name: "John Smith",
-    specialty: "Plumbing",
-    rating: 4.9,
-    reviews: 234,
-    hourlyRate: 75,
-    image: "👨‍🔧",
-    responseTime: "< 1 hour",
-  },
-  {
-    id: 2,
-    name: "Sarah Johnson",
-    specialty: "Electrical",
-    rating: 4.8,
-    reviews: 189,
-    hourlyRate: 85,
-    image: "👩‍🔧",
-    responseTime: "< 2 hours",
-  },
-  {
-    id: 3,
-    name: "Mike Davis",
-    specialty: "HVAC",
-    rating: 4.9,
-    reviews: 267,
-    hourlyRate: 95,
-    image: "👨‍🔧",
-    responseTime: "< 30 min",
-  },
-  {
-    id: 4,
-    name: "Emily Brown",
-    specialty: "Cleaning",
-    rating: 4.7,
-    reviews: 156,
-    hourlyRate: 50,
-    image: "👩‍🔧",
-    responseTime: "< 3 hours",
-  },
-]
+interface ITechnician {
+  id: string
+  userId: string
+  bio: string
+  experience: number
+  hourlyRate: number | string
+  averageRating: number
+  completedJobs: number
+  location: string
+  isAvailable: boolean
+  skills: string[]
+  createdAt: string
+  updatedAt: string
+  user: {
+    id: string
+    name: string
+    email: string
+    phone: string
+    location: string
+    role: string
+    status: string
+    profileImage: string
+    stripeCustomerId: string | null
+    createdAt: string
+    updatedAt: string
+  }
+}
 
-export default function HomePage() {
+export default async function HomePage() {
+  let services: IService[] = []
+  let technicians: ITechnician[] = []
+  let loadError = false
+
+  try {
+    const [servicesRes, techniciansRes] = await Promise.all([
+      getServices({
+        location: "All",
+        sortBy: "createdAt",
+        sortOrder: "desc",
+        minPrice: null,
+        maxPrice: null,
+        page: 1,
+        limit: 6,
+      }),
+      getTechnicians({
+        hourlyRate: "",
+        location: "All",
+        minAverageRating: "0",
+        isAvailable: "true",
+        minCompletedJobs: "",
+        sortBy: "averageRating",
+        sortOrder: "desc",
+        page: 1,
+        limit: 4,
+      }),
+    ])
+
+    services = servicesRes?.data?.result ?? []
+    technicians = techniciansRes?.data?.result ?? []
+  } catch (error) {
+    console.error("Failed to load home page data:", error)
+    loadError = true
+  }
+
   return (
     <main className="min-h-screen bg-linear-to-b from-background to-muted/30">
       {/* Hero Section */}
@@ -142,22 +151,32 @@ export default function HomePage() {
               <div className="grid grid-cols-3 gap-4 pt-8">
                 <div className="space-y-1">
                   <div className="text-2xl font-bold text-foreground">
-                    2.5K+
+                    {technicians.length > 0 ? technicians.length : "2.5K+"}
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Verified Technicians
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-2xl font-bold text-foreground">12K+</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {services.length > 0 ? services.length : "12K+"}
+                  </div>
                   <p className="text-sm text-muted-foreground">
-                    Happy Customers
+                    Services Available
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-2xl font-bold text-foreground">4.8★</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {technicians.length > 0
+                      ? Math.max(
+                          ...technicians.map(
+                            (t) => Number(t.averageRating) || 0
+                          )
+                        ).toFixed(1)
+                      : "4.8"}
+                  </div>
                   <p className="text-sm text-muted-foreground">
-                    Average Rating
+                    Top Technician Rating
                   </p>
                 </div>
               </div>
@@ -168,7 +187,9 @@ export default function HomePage() {
               <div className="relative aspect-square w-full max-w-sm">
                 <div className="absolute inset-0 rounded-3xl bg-linear-to-br from-primary/20 to-primary/5 blur-3xl" />
                 <div className="relative flex flex-col items-center justify-center space-y-6 rounded-3xl bg-linear-to-br from-primary/10 to-primary/5 p-8">
-                  <div className="text-8xl">🔧</div>
+                  <div className="text-8xl">
+                    {services[0]?.technicianProfile?.isAvailable ? "🔧" : "🛠️"}
+                  </div>
                   <p className="text-center text-sm text-muted-foreground">
                     Professional services at your doorstep
                   </p>
@@ -192,35 +213,85 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Services Grid */}
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {featuredServices.map((service) => (
-                <Link
-                  key={service.id}
-                  href={`/services?category=${service.name.toLowerCase()}`}
-                >
-                  <Card className="h-full cursor-pointer transition-shadow hover:shadow-lg">
-                    <CardContent className="p-6">
-                      <div className="space-y-4">
-                        <div className="text-5xl">{service.icon}</div>
-                        <div>
-                          <h3 className="text-lg font-bold text-foreground">
-                            {service.name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {service.description}
-                          </p>
+            {loadError ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <h3 className="mb-2 text-xl font-semibold text-foreground">
+                  Failed to load services
+                </h3>
+                <p className="mb-6 text-muted-foreground">
+                  Please try again later.
+                </p>
+                <Link href="/services">
+                  <Button variant="outline">Browse All Services</Button>
+                </Link>
+              </div>
+            ) : services.length > 0 ? (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {services.map((service) => (
+                  <Link
+                    key={service.id}
+                    href={`/services/details/${service.id}`}
+                    className="block h-full"
+                  >
+                    <Card className="flex h-full flex-col transition-shadow hover:shadow-lg">
+                      <CardHeader>
+                        <CardTitle className="line-clamp-1 text-xl">
+                          {service.title}
+                        </CardTitle>
+                        <CardDescription className="line-clamp-2">
+                          {service.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="flex flex-1 flex-col gap-4">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="size-4 text-primary" />
+                          <span className="text-2xl font-bold text-foreground">
+                            ৳{service.price}
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            /service
+                          </span>
                         </div>
-                        <div className="flex items-center pt-2 text-sm font-medium text-primary">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="size-4" />
+                          <span>{service.location}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Star className="size-4 fill-yellow-400 text-yellow-400" />
+                          <span>
+                            {service.technicianProfile?.averageRating
+                              ? `${service.technicianProfile.averageRating.toFixed(
+                                  1
+                                )} / 5`
+                              : "No reviews yet"}
+                          </span>
+                        </div>
+                        <Button className="mt-auto w-full" size="sm">
                           Explore
                           <ArrowRight className="ml-2 size-4" />
-                        </div>
-                      </div>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i}>
+                    <CardHeader>
+                      <Skeleton className="h-6 w-3/4" />
+                      <Skeleton className="h-4 w-full" />
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <Skeleton className="h-8 w-1/3" />
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-9 w-full" />
                     </CardContent>
                   </Card>
-                </Link>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
             {/* CTA */}
             <div className="pt-6 text-center">
@@ -248,60 +319,110 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Technicians Grid */}
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {topTechnicians.map((tech) => (
-                <Link key={tech.id} href={`/technicians/${tech.id}`}>
-                  <Card className="h-full cursor-pointer overflow-hidden transition-shadow hover:shadow-lg">
-                    <CardContent className="space-y-4 p-6">
-                      {/* Avatar */}
-                      <div className="flex flex-col items-center space-y-3">
-                        <div className="text-6xl">{tech.image}</div>
-                        <div className="text-center">
-                          <h3 className="font-bold text-foreground">
-                            {tech.name}
-                          </h3>
-                          <Badge variant="secondary" className="mt-2">
-                            {tech.specialty}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      {/* Stats */}
-                      <div className="space-y-3 border-t pt-4">
-                        {/* Rating */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1">
-                            <Star className="size-4 fill-yellow-400 text-yellow-400" />
-                            <span className="font-bold text-foreground">
-                              {tech.rating}
-                            </span>
-                            <span className="text-sm text-muted-foreground">
-                              ({tech.reviews})
-                            </span>
+            {loadError ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <h3 className="mb-2 text-xl font-semibold text-foreground">
+                  Failed to load technicians
+                </h3>
+                <p className="mb-6 text-muted-foreground">
+                  Please try again later.
+                </p>
+                <Link href="/technicians">
+                  <Button variant="outline">Browse All Technicians</Button>
+                </Link>
+              </div>
+            ) : technicians.length > 0 ? (
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {technicians.map((tech) => (
+                  <Link
+                    key={tech.id}
+                    href={`/technicians/offered-services/${tech.userId}`}
+                    className="block h-full"
+                  >
+                    <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
+                      <CardContent className="flex flex-1 flex-col gap-4 p-6">
+                        {/* Avatar */}
+                        <div className="flex flex-col items-center space-y-3">
+                          <div className="text-6xl">
+                            {tech.user.profileImage ? (
+                              <img
+                                src={tech.user.profileImage}
+                                alt={tech.user.name}
+                                className="size-20 rounded-full object-cover"
+                              />
+                            ) : (
+                              "👨‍🔧"
+                            )}
+                          </div>
+                          <div className="text-center">
+                            <h3 className="font-bold text-foreground">
+                              {tech.user.name}
+                            </h3>
+                            <Badge variant="secondary" className="mt-2">
+                              {tech.location}
+                            </Badge>
                           </div>
                         </div>
 
-                        {/* Response Time */}
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="size-4" />
-                          <span>{tech.responseTime}</span>
+                        {/* Stats */}
+                        <div className="space-y-3 border-t pt-4">
+                          {/* Rating */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1">
+                              <Star className="size-4 fill-yellow-400 text-yellow-400" />
+                              <span className="font-bold text-foreground">
+                                {Number(tech.averageRating).toFixed(1)}
+                              </span>
+                              <span className="text-sm text-muted-foreground">
+                                ({tech.completedJobs} jobs)
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Availability */}
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <MapPin className="size-4" />
+                            <span>{tech.location}</span>
+                          </div>
+
+                          {/* Hourly Rate */}
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <DollarSign className="size-4" />
+                            <span>৳{tech.hourlyRate}/hour</span>
+                          </div>
                         </div>
 
-                        {/* Hourly Rate */}
-                        <div className="flex items-center gap-2 text-sm font-medium">
-                          <DollarSign className="size-4" />
-                          <span>${tech.hourlyRate}/hour</span>
-                        </div>
+                        {/* CTA */}
+                        <Button
+                          className="mt-auto w-full"
+                          disabled={!tech.isAvailable}
+                        >
+                          {tech.isAvailable ? "Book Now" : "Unavailable"}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {[...Array(4)].map((_, i) => (
+                  <Card key={i}>
+                    <CardContent className="space-y-4 p-6">
+                      <div className="flex flex-col items-center space-y-3">
+                        <Skeleton className="size-20 rounded-full" />
+                        <Skeleton className="h-6 w-24" />
                       </div>
-
-                      {/* CTA */}
-                      <Button className="mt-2 w-full">Book Now</Button>
+                      <div className="space-y-3">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-2/3" />
+                        <Skeleton className="h-9 w-full" />
+                      </div>
                     </CardContent>
                   </Card>
-                </Link>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>
