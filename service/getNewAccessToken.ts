@@ -11,7 +11,7 @@ export const getNewAccessToken = async () => {
       message: "User not logged in!",
     }
   }
-  console.log(`${process.env.BACKEND_API_URL}api/auth/refresh-token`)
+
   const res = await fetch(
     `${process.env.BACKEND_API_URL}/api/auth/refresh-token`,
     {
@@ -22,7 +22,6 @@ export const getNewAccessToken = async () => {
     }
   )
   const result = await res.json()
-  console.log(result)
 
   return result
 }

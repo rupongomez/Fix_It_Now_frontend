@@ -15,7 +15,6 @@ export const getAvailability = async (technicianId: string) => {
   )
 
   const result = await res.json()
-
   return result
 }
 

@@ -37,7 +37,6 @@ export const getTechnicianProfileById = async (id: string) => {
     `${process.env.BACKEND_API_URL}/api/technician/profile/${id}`
   )
   const result = await res.json()
-  console.log(result)
   return result
 }
 
@@ -74,6 +73,5 @@ export const updateTechnicianProfile = async (
   )
   const result = await res.json()
 
-  console.log(result)
   return result
 }

@@ -121,7 +121,6 @@ const BookingPageComponent = () => {
     fetchBookings()
   }, [])
 
-  console.log(bookings)
   const handleStatusChange = async (bookingId: string, newStatus: string) => {
     setUpdatingBookingId(bookingId)
 
@@ -139,7 +138,7 @@ const BookingPageComponent = () => {
         bookingId,
         newStatus
       )
-      console.log(response)
+
       if (!response.success) {
         throw new Error(response.message || "Failed to update booking")
       }

@@ -1,8 +1,7 @@
 import { cookies } from "next/headers"
 import { NextRequest, NextResponse } from "next/server"
 import { jwtUtils } from "./service/utils/jwt"
-import { redirect } from "next/navigation"
-import { logout } from "./service/logout"
+
 import { JwtPayload } from "jsonwebtoken"
 import { getNewAccessToken } from "./service/getNewAccessToken"
 

@@ -130,7 +130,7 @@ export default function CustomerBookingPageComponent() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null)
 
-  // ✅ Review Modal state - Use technicianProfileId
+  //   Review Modal state - Use technicianProfileId
   const [reviewModalOpen, setReviewModalOpen] = useState(false)
   const [bookingToReview, setBookingToReview] = useState<{
     id: string
@@ -186,7 +186,6 @@ export default function CustomerBookingPageComponent() {
 
     try {
       const response = await cancelBooking(bookingToCancel.id)
-      console.log(response)
       if (!response.success) {
         throw new Error(response.message || "Failed to cancel booking")
       }
@@ -212,16 +211,16 @@ export default function CustomerBookingPageComponent() {
     }
   }
 
-  // ✅ Open review modal - Map technicianId to technicianProfileId
+  //   Open review modal - Map technicianId to technicianProfileId
   const openReviewModal = (booking: Booking) => {
     setBookingToReview({
       id: booking.id,
-      technicianProfileId: booking.technicianId, // ✅ Map to technicianProfileId
+      technicianProfileId: booking.technicianId, //   Map to technicianProfileId
     })
     setReviewModalOpen(true)
   }
 
-  // ✅ Handle review submission - Send technicianProfileId
+  //   Handle review submission - Send technicianProfileId
   const handleSubmitReview = async (data: {
     bookingId: string
     technicianProfileId: string

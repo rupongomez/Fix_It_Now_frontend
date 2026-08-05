@@ -80,7 +80,6 @@ const TechnicianDashboardStats = () => {
       try {
         setIsLoading(true)
         const response = await getBookingsForTechnician()
-        console.log("Bookings response:", response)
 
         if (response.success && response.data) {
           setBookings(response.data)

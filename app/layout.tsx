@@ -6,9 +6,14 @@ import { cn } from "@/lib/utils"
 import { Toaster } from "sonner"
 import { Navbar } from "@/components/shared/Navbar"
 import { getMe } from "@/service/getMe"
+import { Metadata } from "next"
+import { Footer } from "@/components/shared/Footer"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
-
+export const metadata: Metadata = {
+  title: "FixItNow",
+  description: "Your trusted home service platform",
+}
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
@@ -37,7 +42,9 @@ export default async function RootLayout({
         <Navbar user={user} />
 
         <Toaster position="top-right" richColors />
-        {children}
+        <div className="min-h-screen">{children}</div>
+
+        <Footer />
         {/* </ThemeProvider> */}
       </body>
     </html>

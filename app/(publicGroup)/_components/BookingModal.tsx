@@ -31,7 +31,7 @@ import { makeBookingRequest } from "../_actions/bookingAction"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
-// ✅ Zod Schema for validation
+//   Zod Schema for validation
 const bookingSchema = z.object({
   customerAddress: z.string().min(1, "Service address is required"),
   note: z.string().optional(),
@@ -87,7 +87,7 @@ export function BookingModal({
   const [selectedSlotId, setSelectedSlotId] = useState<string>("")
   const router = useRouter()
 
-  // ✅ React Hook Form setup
+  //   React Hook Form setup
   const {
     register,
     handleSubmit,
@@ -104,7 +104,7 @@ export function BookingModal({
     },
   })
 
-  // ✅ Handle modal open/close - reset state when closing
+  //   Handle modal open/close - reset state when closing
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
       // Reset everything when modal closes
@@ -122,7 +122,6 @@ export function BookingModal({
     const fetchAvailability = async () => {
       try {
         const response = await getAvailability(service.technicianProfileId)
-        console.log("Availability response:", response)
 
         if (response.success && response.data) {
           setAvailabilitySlots(response.data)

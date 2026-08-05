@@ -1,7 +1,3 @@
-// app/(dashboardGroup)/dashboard/admin/AdminDashboardContent.tsx
-"use client"
-
-import { useEffect, useState } from "react"
 import {
   Card,
   CardContent,
@@ -10,56 +6,11 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import {
-  Users,
-  BookOpen,
-  DollarSign,
-  TrendingUp,
-  UserCheck,
-  UserX,
-  Calendar,
-  Loader2,
-} from "lucide-react"
-import { toast } from "sonner"
-import {
-  getAllBookings,
-  getAllUsers,
-  updateUserStatus,
-} from "../_actions/adminActions"
+import { Users, BookOpen, DollarSign, TrendingUp, Calendar } from "lucide-react"
+import { getAllBookings, getAllUsers } from "../_actions/adminActions"
+import { UserTable } from "./UseresTable"
 
-interface User {
-  id: string
-  name: string
-  email: string
-  phone: string
-  location: string
-  role: "ADMIN" | "CUSTOMER" | "TECHNICIAN"
-  status: "ACTIVE" | "INACTIVE" | "BANNED"
-  profileImage?: string
-  createdAt: string
-  updatedAt: string
-}
-
+// Booking interface
 interface Booking {
   id: string
   customerId: string
@@ -117,129 +68,16 @@ const STATUS_CONFIG: Record<string, { color: string; label: string }> = {
   },
 }
 
-const ROLE_BADGE_COLORS = {
-  ADMIN:
-    "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  CUSTOMER: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  TECHNICIAN:
-    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-}
+export async function AdminDashboardContent() {
+  // Fetch bookings
+  const bookingsRes = await getAllBookings()
+  const bookings: Booking[] = bookingsRes.success ? bookingsRes.data : []
 
-const STATUS_BADGE_COLORS = {
-  ACTIVE:
-    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  INACTIVE:
-    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
-  BANNED: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-}
+  // Fetch total users count (for stats)
+  const usersRes = await getAllUsers({ page: 1, limit: 1 })
+  const totalUsers = usersRes.success ? usersRes.data.totalUserCount : 0
 
-export function AdminDashboardContent() {
-  const [users, setUsers] = useState<User[]>([])
-  const [bookings, setBookings] = useState<Booking[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [updatingUserId, setUpdatingUserId] = useState<string | null>(null)
-
-  // ✅ AlertDialog state
-  const [alertDialogOpen, setAlertDialogOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<{
-    id: string
-    status: string
-    name: string
-  } | null>(null)
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true)
-        const [usersRes, bookingsRes] = await Promise.all([
-          getAllUsers(),
-          getAllBookings(),
-        ])
-
-        console.log("Users:", usersRes)
-        console.log("Bookings:", bookingsRes)
-
-        if (usersRes.success && usersRes.data) {
-          setUsers(usersRes.data)
-        } else {
-          toast.error(usersRes.message || "Failed to fetch users")
-        }
-
-        if (bookingsRes.success && bookingsRes.data) {
-          setBookings(bookingsRes.data)
-        } else {
-          toast.error(bookingsRes.message || "Failed to fetch bookings")
-        }
-      } catch (error) {
-        console.error("Failed to fetch admin data:", error)
-        toast.error("Something went wrong")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [])
-
-  // ✅ Open confirmation dialog
-  const openConfirmDialog = (
-    userId: string,
-    currentStatus: string,
-    userName: string
-  ) => {
-    setSelectedUser({ id: userId, status: currentStatus, name: userName })
-    setAlertDialogOpen(true)
-  }
-
-  // ✅ Handle the actual status change
-  const confirmStatusChange = async () => {
-    if (!selectedUser) return
-
-    const { id, status: currentStatus } = selectedUser
-    const newStatus = currentStatus === "ACTIVE" ? "BANNED" : "ACTIVE"
-    const action = newStatus === "BANNED" ? "ban" : "unban"
-
-    setUpdatingUserId(id)
-
-    // Optimistic update
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === id ? { ...user, status: newStatus as User["status"] } : user
-      )
-    )
-
-    try {
-      const response = await updateUserStatus(id, newStatus)
-      console.log("Update response:", response)
-
-      if (!response.success) {
-        throw new Error(response.message || `Failed to ${action} user`)
-      }
-
-      toast.success(`User ${action}ned successfully`)
-    } catch (error) {
-      // Revert on error
-      setUsers((prev) =>
-        prev.map((user) =>
-          user.id === id
-            ? { ...user, status: currentStatus as User["status"] }
-            : user
-        )
-      )
-      toast.error(
-        error instanceof Error ? error.message : `Failed to ${action} user`
-      )
-      console.error(error)
-    } finally {
-      setUpdatingUserId(null)
-      setAlertDialogOpen(false)
-      setSelectedUser(null)
-    }
-  }
-
-  const totalUsers = users.length
-  const activeUsers = users.filter((u) => u.status === "ACTIVE").length
-  const bannedUsers = users.filter((u) => u.status === "BANNED").length
+  // Stats from bookings
   const totalBookings = bookings.length
   const pendingBookings = bookings.filter(
     (b) => b.status === "REQUESTED"
@@ -252,37 +90,6 @@ export function AdminDashboardContent() {
         b.status === "PAID"
     )
     .reduce((sum, b) => sum + parseFloat(b.totalPrice || "0"), 0)
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="pb-2">
-                <Skeleton className="h-4 w-24" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-16" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        <div className="grid gap-6 lg:grid-cols-2">
-          {[...Array(2)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <Skeleton className="h-6 w-32" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-64 w-full" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="space-y-6">
@@ -297,9 +104,7 @@ export function AdminDashboardContent() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalUsers}</div>
-            <p className="text-xs text-muted-foreground">
-              {activeUsers} active • {bannedUsers} banned
-            </p>
+            <p className="text-xs text-muted-foreground">Registered users</p>
           </CardContent>
         </Card>
 
@@ -351,100 +156,8 @@ export function AdminDashboardContent() {
         </Card>
       </div>
 
-      {/* Users Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">User Management</CardTitle>
-          <CardDescription>
-            Manage user accounts and permissions
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{user.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {user.location}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm">{user.email}</span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        className={
-                          ROLE_BADGE_COLORS[
-                            user.role as keyof typeof ROLE_BADGE_COLORS
-                          ]
-                        }
-                      >
-                        {user.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        className={
-                          STATUS_BADGE_COLORS[
-                            user.status as keyof typeof STATUS_BADGE_COLORS
-                          ]
-                        }
-                      >
-                        {user.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm text-muted-foreground">
-                        {new Date(user.createdAt).toLocaleDateString()}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        variant={
-                          user.status === "ACTIVE" ? "destructive" : "default"
-                        }
-                        onClick={() =>
-                          openConfirmDialog(user.id, user.status, user.name)
-                        }
-                        disabled={
-                          updatingUserId === user.id || user.role === "ADMIN"
-                        }
-                      >
-                        {updatingUserId === user.id ? (
-                          <Loader2 className="size-4 animate-spin" />
-                        ) : user.status === "ACTIVE" ? (
-                          <UserX className="size-4" />
-                        ) : (
-                          <UserCheck className="size-4" />
-                        )}
-                        <span className="ml-2">
-                          {user.status === "ACTIVE" ? "Ban" : "Unban"}
-                        </span>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+      {/* User Table */}
+      <UserTable />
 
       {/* Recent Bookings */}
       <Card>
@@ -506,45 +219,6 @@ export function AdminDashboardContent() {
           )}
         </CardContent>
       </Card>
-
-      {/* ✅ AlertDialog for confirmation */}
-      <AlertDialog open={alertDialogOpen} onOpenChange={setAlertDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {selectedUser?.status === "ACTIVE" ? "Ban User" : "Unban User"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to{" "}
-              {selectedUser?.status === "ACTIVE" ? "ban" : "unban"}{" "}
-              <strong>{selectedUser?.name}</strong>?
-              {selectedUser?.status === "ACTIVE" && (
-                <span className="mt-2 block text-red-500">
-                  This action will prevent the user from accessing the platform.
-                </span>
-              )}
-              {selectedUser?.status === "BANNED" && (
-                <span className="mt-2 block text-green-500">
-                  This will restore the user`&apos;`s access to the platform.
-                </span>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmStatusChange}
-              className={
-                selectedUser?.status === "ACTIVE"
-                  ? "bg-red-600 hover:bg-red-700"
-                  : "bg-green-600 hover:bg-green-700"
-              }
-            >
-              {selectedUser?.status === "ACTIVE" ? "Ban" : "Unban"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   )
 }

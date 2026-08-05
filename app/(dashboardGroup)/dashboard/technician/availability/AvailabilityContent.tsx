@@ -1,4 +1,3 @@
-// app/(dashboardGroup)/dashboard/technician/availability/page.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -21,8 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
+
 import { CalendarIcon, Clock, Loader2, Plus } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import {
@@ -65,6 +63,7 @@ export default function AvailabilityContent() {
       try {
         setIsLoading(true)
         const userData = await getMe()
+
         if (userData.success && userData.data) {
           setUser(userData)
 
@@ -262,7 +261,7 @@ export default function AvailabilityContent() {
           <DialogHeader>
             <DialogTitle>Add Availability</DialogTitle>
             <DialogDescription>
-              Select a date and time range when you're available
+              Select a date and time range when you`&apos;`re available
             </DialogDescription>
           </DialogHeader>
 

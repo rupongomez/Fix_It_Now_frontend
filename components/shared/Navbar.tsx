@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LayoutDashboard, LogOut, Settings, User } from "lucide-react"
+import { Cog, LayoutDashboard, LogOut, Settings, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { logout } from "@/service/logout"
 import { IUser } from "@/lib/types/UserTypes"
@@ -60,9 +60,9 @@ export function Navbar({ user }: { user?: IUser }) {
         {/* Logo */}
         <Link
           href="/"
-          className="text-xl font-bold text-foreground transition-opacity hover:opacity-80"
+          className="flex items-center gap-2 text-xl font-bold text-foreground transition-opacity hover:opacity-80"
         >
-          Logo
+          <Cog /> Fix It Now
         </Link>
 
         {/* Center Navigation Links */}

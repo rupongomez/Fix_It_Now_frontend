@@ -1,4 +1,3 @@
-// app/(dashboardGroup)/_components/ReviewModal.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -49,7 +48,7 @@ export function ReviewModal({
   } | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  // ✅ Check if review already exists when modal opens
+  //   Check if review already exists when modal opens
   useEffect(() => {
     const checkExistingReview = async () => {
       if (!booking?.id) {
@@ -57,11 +56,9 @@ export function ReviewModal({
         return
       }
 
-      console.log("Checking review for booking:", booking.id)
       setIsLoading(true)
       try {
         const response = await getReviewsForCustomer(booking.id)
-        console.log("Review check response:", response)
 
         if (response.success && response.data && response.data.length > 0) {
           const review = response.data[0]
@@ -141,7 +138,7 @@ export function ReviewModal({
             <Loader2 className="size-8 animate-spin text-primary" />
           </div>
         ) : hasReview && existingReview ? (
-          // ✅ Show existing review
+          //   Show existing review
           <div className="space-y-4 py-4">
             <div className="rounded-lg bg-green-50 p-4 text-center dark:bg-green-950/20">
               <CheckCircle2 className="mx-auto mb-2 size-8 text-green-500" />
@@ -173,7 +170,7 @@ export function ReviewModal({
             </DialogFooter>
           </div>
         ) : (
-          // ✅ Review form
+          //   Review form
           <>
             <div className="space-y-4 py-4">
               <div className="space-y-2">

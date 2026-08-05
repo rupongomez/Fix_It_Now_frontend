@@ -1,4 +1,3 @@
-// app/(dashboardGroup)/dashboard/customer/CustomerDashboardContent.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -117,9 +116,6 @@ export function CustomerDashboardContent() {
           getLoggedInCustomersBookings(),
           getMe(),
         ])
-
-        console.log("Bookings:", bookingsRes)
-        console.log("User:", userData)
 
         if (bookingsRes.success && bookingsRes.data) {
           setBookings(bookingsRes.data)

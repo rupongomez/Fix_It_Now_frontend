@@ -17,7 +17,7 @@ export function SearchBar() {
     }
 
     debouncedReference.current = setTimeout(() => {
-      const params = new URLSearchParams()
+      const params = new URLSearchParams(searchParams)
 
       if (value) {
         params.set("searchTerms", value)

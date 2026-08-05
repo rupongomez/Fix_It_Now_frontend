@@ -17,7 +17,6 @@ export const cancelBooking = async (bookingId: string) => {
     }
   )
   const result = await response.json()
-  console.log(result)
 
   return result
 }

@@ -82,7 +82,7 @@ const TechnicianProfile = () => {
         }
         setLoading(false)
       } catch (error) {
-        console.log(error)
+        error
       }
     }
     fetchTechnician()
@@ -138,7 +138,7 @@ const TechnicianProfile = () => {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {/* ✅ Edit Profile Button */}
+          {/*   Edit Profile Button */}
           <Button variant="default" onClick={() => setEditModalOpen(true)}>
             <Pencil className="mr-2 size-4" />
             Edit Profile
@@ -240,7 +240,7 @@ const TechnicianProfile = () => {
                   </p>
                 </div>
               </div>
-              {/* ✅ Skills Display */}
+              {/*   Skills Display */}
               {technician.skills && technician.skills.length > 0 && (
                 <>
                   <Separator />
@@ -405,7 +405,7 @@ const TechnicianProfile = () => {
         </div>
       </div>
 
-      {/* ✅ Edit Profile Modal */}
+      {/*   Edit Profile Modal */}
       <EditProfileModal
         open={editModalOpen}
         onOpenChange={setEditModalOpen}

@@ -1,21 +1,8 @@
 import Link from "next/link"
-import {
-  Star,
-  Wrench,
-  MapPin,
-  DollarSign,
-  ArrowRight,
-  Search,
-} from "lucide-react"
+import { Star, MapPin, DollarSign, ArrowRight, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 
 export const metadata = {
   title: "FixItNow - Your Trusted Home Service Platform",

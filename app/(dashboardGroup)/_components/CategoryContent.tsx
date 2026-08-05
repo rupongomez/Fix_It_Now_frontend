@@ -1,4 +1,3 @@
-// app/(dashboardGroup)/dashboard/admin/categories/CategoriesContent.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -46,10 +45,10 @@ export function CategoriesContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // ✅ Modal states
+  //   Modal states
   const [modalOpen, setModalOpen] = useState(false)
 
-  // ✅ Form state
+  //   Form state
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -60,7 +59,6 @@ export function CategoriesContent() {
       try {
         setIsLoading(true)
         const response = await getCategories()
-        console.log("Categories:", response)
 
         if (response.success && response.data) {
           setCategories(response.data)
@@ -212,7 +210,7 @@ export function CategoriesContent() {
         </CardContent>
       </Card>
 
-      {/* ✅ Create Modal */}
+      {/*   Create Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

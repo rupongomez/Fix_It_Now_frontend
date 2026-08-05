@@ -93,7 +93,6 @@ export default function ServiceDetailsPage() {
         setIsLoading(true)
         setError(null)
         const response = await getServiceDetails(params.id as string)
-        console.log(response)
         if (response.success && response.data) {
           console.log(response.data.technicianProfileId)
           setService(response.data)

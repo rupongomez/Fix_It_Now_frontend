@@ -1,4 +1,3 @@
-// app/(publicGroup)/paid/page.tsx
 "use client"
 
 import { startTransition, useEffect, useState } from "react"
@@ -8,7 +7,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import { CheckCircle2, XCircle, Loader2, Home, ArrowRight } from "lucide-react"

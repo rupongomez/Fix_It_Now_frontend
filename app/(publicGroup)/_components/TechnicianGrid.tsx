@@ -10,9 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { MapPin, Clock, DollarSign, Star, X, Briefcase } from "lucide-react"
+import { MapPin, DollarSign, Star, X, Briefcase } from "lucide-react"
 import { getTechnicians } from "../_actions/serverActions"
 import {
   Pagination,
@@ -123,8 +122,6 @@ const TechnicianGrid = () => {
           limit: ITEMS_PER_PAGE,
           searchTerms: searchTerms,
         })
-
-        console.log(loadTechnicians.data.result)
         setTechnicians(loadTechnicians.data.result)
         setTotalItems(loadTechnicians.data.totalTechnicians)
       } catch (err) {

@@ -25,12 +25,10 @@ export default async function RootLayout({
   return (
     <div>
       <SidebarProvider>
-        <div className="flex h-screen flex-col">
+        <div className="flex min-h-screen flex-col">
           <div className="flex flex-1">
             <DashBoardSidebar user={user} />
-            <main className="flex-1 overflow-y-auto xl:pl-20 2xl:pl-30">
-              {children}
-            </main>
+            <main className="flex-1 xl:pl-20 2xl:pl-60">{children}</main>
           </div>
         </div>
       </SidebarProvider>

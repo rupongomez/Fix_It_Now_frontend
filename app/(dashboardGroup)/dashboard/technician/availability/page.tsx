@@ -1,4 +1,3 @@
-// app/(dashboardGroup)/dashboard/technician/availability/page.tsx
 "use client"
 
 import AvailabilityContent from "./AvailabilityContent"

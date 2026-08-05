@@ -6,7 +6,6 @@ import { cookies } from "next/headers"
 export const submitReview = async (data: IReviewFormData) => {
   const cookieStore = await cookies()
   const accessToken = cookieStore.get("accessToken")
-  console.log(data)
   const res = await fetch(`${process.env.BACKEND_API_URL}/api/reviews`, {
     method: "POST",
     headers: {
@@ -17,7 +16,7 @@ export const submitReview = async (data: IReviewFormData) => {
   })
 
   const result = await res.json()
-  console.log(result)
+
   return result
 }
 
@@ -27,6 +26,6 @@ export const getReviewsForCustomer = async (bookingId: string) => {
   )
 
   const result = await res.json()
-  console.log(result)
+
   return result
 }

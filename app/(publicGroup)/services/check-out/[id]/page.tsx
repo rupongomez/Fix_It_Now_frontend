@@ -77,16 +77,12 @@ export default function CheckoutPage() {
   const params = useParams()
   const router = useRouter()
 
-  // ✅ Get the id from params
+  //   Get the id from params
   const bookingId = params?.id as string
-
-  // ✅ Log to debug
-  console.log("Params:", params)
-  console.log("Booking ID:", bookingId)
 
   useEffect(() => {
     const fetchBookingDetails = async () => {
-      // ✅ Check if bookingId exists
+      //   Check if bookingId exists
       if (!bookingId) {
         setError("Booking ID is required")
         setIsLoading(false)

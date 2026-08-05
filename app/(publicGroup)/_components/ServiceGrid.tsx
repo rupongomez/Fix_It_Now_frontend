@@ -96,7 +96,6 @@ const ServiceGrid = () => {
         })
 
         setServices(loadServices.data.result)
-        console.log(loadServices.data.result)
 
         setTotalItems(loadServices.data.totalServiceCount)
       } catch (err) {

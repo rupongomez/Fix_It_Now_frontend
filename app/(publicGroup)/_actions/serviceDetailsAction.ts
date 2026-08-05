@@ -15,8 +15,6 @@ export const getServiceDetails = async (serviceId: string) => {
       },
     }
   )
-
-  console.log(res)
   const result = await res.json()
 
   return result

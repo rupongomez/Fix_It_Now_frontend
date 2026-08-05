@@ -52,7 +52,6 @@ export default function TechnicianServicesPage() {
         const response = await getServicesOfferedByThisTechnician(technicianId)
         const userData = await getMe()
         setUser(userData)
-        console.log(userData)
 
         if (response.success && response.data) {
           setServices(response.data)
@@ -157,7 +156,7 @@ export default function TechnicianServicesPage() {
 
   return (
     <div className="mx-auto w-11/12 space-y-8">
-      {/* ✅ Technician Profile Card */}
+      {/*   Technician Profile Card */}
       <Card className="overflow-hidden border-0 shadow-lg">
         <div className="h-32 bg-linear-to-r from-primary/20 to-primary/10" />
         <CardContent className="relative -mt-16">
@@ -247,7 +246,7 @@ export default function TechnicianServicesPage() {
         </CardContent>
       </Card>
 
-      {/* ✅ Services Section */}
+      {/*   Services Section */}
       <div>
         <div className="mb-4 flex items-center justify-between">
           <div>
